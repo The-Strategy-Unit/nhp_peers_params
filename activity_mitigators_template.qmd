@@ -1,0 +1,18 @@
+---
+title: "`r params$selected_peer` Activity Mitigator Report"
+format:
+  html: 
+    self-contained: true
+editor: visual
+params:
+  selected_peer: "RCX"
+---
+
+```{r}
+source("plot_activity_mitigator_fun.R")
+
+readRDS("secret/plot_data.RDS") |>  dplyr::mutate(highlighted_scheme = params$selected_peer) |> 
+  purrr::pmap(make_activity_mitigator_graphs)
+  
+
+```
