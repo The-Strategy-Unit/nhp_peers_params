@@ -1,5 +1,5 @@
 
-all_schemes <- readRDS("secret/all_peers.rds")[1:2]
+all_schemes <- readRDS("secret/all_peers.rds")
 
 purrr::walk(all_schemes,
             ~quarto::quarto_render(
