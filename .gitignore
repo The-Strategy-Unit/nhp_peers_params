@@ -2,4 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-secret/
+*.html
+*.qmd
+*.json
