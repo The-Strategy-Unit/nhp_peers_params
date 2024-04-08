@@ -31,25 +31,32 @@ saveRDS(all_schemes, "secret/all_peers.rds")
 # create plot_data df ----
 plot_data <- activity_mitigators |> 
   dplyr::left_join(nee, by = c(strategy = "param_name")) |> 
-  dplyr::mutate(midpoint = (value_2 + value_1)/2) |>
-  dplyr::rename("lo" = value_1,
-                "hi" = value_2) |> 
-  tidyr::pivot_longer(cols = c(lo, hi, midpoint), 
+  dplyr::mutate(Midpoint = (value_2 + value_1)/2) |>
+  dplyr::rename("Low" = value_1,
+                "High" = value_2) |> 
+  tidyr::pivot_longer(cols = c(Low, High, Midpoint), 
                       names_to = "value_type",
-                      values_to = "value") |> 
+                      values_to = "value") |>
+  dplyr::mutate(value_type = as.factor(value_type),
+                shape_type = dplyr::case_when(value_type %in% c("Low",
+                                                                "High") ~ "line",
+                                              value_type %in% c("Midpoint") ~ "point"),
+                ) |> 
   dplyr::mutate(peer = factor(peer)) |> 
   dplyr::group_by(activity_type,
                   strategy,
                   time_profile,
                   value_type) |> 
-  dplyr::mutate(mean_val = mean(value)) |> 
-  tidyr::nest(data = c(peer, value_type, value, mean_val)) |>
+  dplyr::mutate(mean_val = mean(value),
+                mean_type = paste("Mean", value_type)) |>
+  tidyr::nest(data = c(peer, value_type, value, mean_val, mean_type, shape_type)) |>
   dplyr::select(parameter, 
                 activity_type, 
                 strategy, 
                 time_profile, 
                 dplyr::everything()) |> 
   dplyr::arrange(activity_type, strategy, time_profile) 
+
 
 # save data ----
 
