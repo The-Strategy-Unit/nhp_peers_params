@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+nee_table.Rds
 *.html
 *.qmd
 *.json
