@@ -9,7 +9,7 @@ params <- list.files("secret/jsons/", full.names = T) |>
 
 #read in nee values and select key column and hi/lo limits ----
 
-nee <- readRDS("nee_table.rds") |>
+nee <- readRDS("secret/nee_table.rds") |>
   dplyr::select(param_name,
                 percentile10,
                 percentile90) |> 
