@@ -9,39 +9,39 @@ peers_activity_params <- activity_mitigators |>
   dplyr::select(-value_1, -value_2, -time_profile) |> 
   dplyr::mutate(flag = 1) |> 
   tidyr::pivot_wider(names_from = "peer", values_from = "flag") |> 
-  dplyr::mutate(dplyr::across(c(tidyselect::everything(), -activity_type, -strategy, -parameter), 
+  dplyr::mutate(perc_peers_picked = scales::label_percent()(
+    rowSums(dplyr::across(c(
+    tidyselect::everything(), 
+    -activity_type, 
+    -strategy, 
+    -parameter)),
+    na.rm = T) /
+      length(dplyr::across(
+        c(
+          tidyselect::everything(), 
+          -activity_type, 
+          -strategy, 
+          -parameter)
+      ))
+  )
+) |> 
+  dplyr::mutate(dplyr::across(c(tidyselect::everything(), 
+                                -activity_type,
+                                -strategy,
+                                -parameter,
+                                -perc_peers_picked), 
                 ~ifelse(is.na(.x), 
                         htmltools::HTML("&#10005;"), #cross
                         htmltools::HTML("&#10003;") #tick 
                         )))
-                        #htmltools::HTML("&#10004;"))))
-
-
-#replace_na(x,0)
 
 gt::gt(peers_activity_params) |> 
   gt::fmt_markdown(columns = c(tidyselect::everything(), 
                                -activity_type,
                                -strategy,
-                               -parameter)
+                               -parameter,
+                               -perc_peers_picked)
                    ) |> 
-  #gt::data_color(direction = "column",
-   #              column = c(tidyselect::everything(), - activity_type, -strategy, -parameter),
-    #             #method = "auto",
-     #            palette = c("grey20", "gold"),
-      #           domain = c(fontawesome::fa("times"),
-        #                    htmltools::HTML("&#10003;")
-       #                     )
-         #        )
-  # gt::tab_style(
-  #   style = list(
-  #     gt::cell_fill(color = "gold")
-  #     ),
-  #   location = gt::cells_body(
-  #     columns = c(tidyselect::everything(), - activity_type, -strategy, -parameter),
-  #     #rows = peers_activity_params$activity_type[peers_activity_params$activity_type == "&#10003;"]
-  #     )
-  #   )
   gt::tab_style_body(
     style = gt::cell_fill(color = "gold"),
     values = "&#10003;"
@@ -50,5 +50,15 @@ gt::gt(peers_activity_params) |>
     style = gt::cell_fill(color = "grey80"),
     values = "&#10005;"
   ) |> 
-  gt::cols_align(align = "center")
+  gt::cols_align(align = "center") |> 
+  gt::grand_summary_rows(columns = c(tidyselect::everything(), 
+                               -activity_type,
+                               -strategy,
+                               -parameter,
+                               -perc_peers_picked
+                               ),
+                         fns = perc_params_picked ~ scales::label_percent() 
+                         (sum(stringr::str_detect("&#10003;", .x))/ 
+                           length(.x))
+)
 
