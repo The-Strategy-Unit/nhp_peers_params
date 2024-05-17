@@ -2,14 +2,36 @@ source("funs_get_param.R")
 
 highlighted_scheme <- "RAS"
 
+json_to_param <- function(x){
+  jsonlite::fromJSON(x)$params
+}
+
+params <- list.files("secret/jsons/", full.names = T) |> 
+  purrr::map(json_to_param)
+
+selected_activity_mitigators <- purrr::map(params, purrr::possibly(report_params_table_activity_avoidance)) |> 
+  purrr::list_rbind()|> 
+  dplyr::select(-time_profile)
+
+sample_activity_params <- jsonlite::fromJSON("secret/all_params.json")$params |> 
+  report_params_table_activity_avoidance() |> 
+  dplyr::select(-time_profile,
+                -value_1,
+                -value_2,
+                -peer)
+
+activity_mitigators <- sample_activity_params |> 
+  dplyr::left_join(selected_activity_mitigators,
+                   by = c("activity_type",
+                          "strategy",
+                          "parameter"))
+
 make_param_gt <- function(highlighted_scheme){
-all_activity_params <- jsonlite::fromJSON("secret/all_params.json")$params |> 
-  report_params_table_activity_avoidance()
 
 all_schemes <- readRDS("secret/all_peers.rds")
 
 peers_activity_params <- activity_mitigators |> 
-  dplyr::select(-value_1, -value_2, -time_profile) |> 
+  dplyr::select(-value_1, -value_2) |> 
   dplyr::mutate(flag = 1) |> 
   tidyr::pivot_wider(names_from = "peer", values_from = "flag") |> 
   dplyr::mutate(perc_peers_picked = scales::label_percent()(
@@ -37,11 +59,7 @@ peers_activity_params <- activity_mitigators |>
                         htmltools::HTML("&#10005;"), #cross
                         htmltools::HTML("&#10003;") #tick 
                         ))) |> 
-  dplyr::rename_with(#dplyr::across(c(tidyselect::everything(), 
-                      #          -activity_type,
-                        #        -strategy,
-                       #         -parameter,
-                         #       -perc_peers_picked)))
+  dplyr::rename_with(
     ~paste("Scheme", c(1:(length(all_schemes)-1))), 
     (c(tidyselect::everything(), 
                -activity_type,
@@ -87,9 +105,7 @@ gt::gt(peers_activity_params) |>
           columns = highlighted_scheme
         )
       )
-    )
-  ) |> 
-  
+    ) |> 
   gt::cols_align(align = "center") |> 
   gt::grand_summary_rows(columns = c(tidyselect::everything(), 
                                -activity_type,
