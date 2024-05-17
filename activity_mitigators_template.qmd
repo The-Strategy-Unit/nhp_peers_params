@@ -17,7 +17,7 @@ This report displays the Activity Avoidance parameter values selected by schemes
 
 Each graph contains the High and Low values that were inputted into the model for each scheme.
 
-The Midpoint value has been calculated from the High and Low values that the scheme inputted. 
+The Midpoint value has been calculated from the High and Low values that the scheme inputted.
 
 Each graph also shows a mean average of the High, Low and Midpoint values across all of the schemes.\
 \
