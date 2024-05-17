@@ -71,6 +71,25 @@ gt::gt(peers_activity_params) |>
     style = gt::cell_fill(color = "grey80"),
     values = "&#10005;"
   ) |> 
+  gt::tab_style(
+    style = list(
+      gt::cell_borders(
+        sides = c("left", "right"),
+        color = "red",
+        weight = gt::px(3)
+      )
+      ),
+      locations = list(
+        gt::cells_body(
+          columns = highlighted_scheme
+        ),
+        gt::cells_column_labels(
+          columns = highlighted_scheme
+        )
+      )
+    )
+  ) |> 
+  
   gt::cols_align(align = "center") |> 
   gt::grand_summary_rows(columns = c(tidyselect::everything(), 
                                -activity_type,
