@@ -13,10 +13,20 @@ toc-depth: 3
 toc-expand: false
 ---
 
+This report displays the Activity Avoidance parameter values selected by schemes in the Inputs App. In order to identify your scheme, the Midpoint value for `r params$selected_peer` will be highlighted throughout this report in red.
+
+Each graph contains the High and Low values that were inputted into the model for each scheme.
+
+The Midpoint value has been calculated from the High and Low values that the scheme inputted.
+
+Each graph also shows a mean average of the High, Low and Midpoint values across all of the schemes.\
+\
+The graphs also display the NEE recommended High and Low values.
+
 ```{r, echo = F, warning = F, results = "asis"}
 source("plot_activity_mitigator_fun.R")
 
-df <- readRDS("secret/plot_data.RDS") |> 
+df <- readRDS("secret/plot_data.RDS") |>
   dplyr::mutate(highlighted_scheme = params$selected_peer)
 
 for(a in unique(df$activity_type)){
