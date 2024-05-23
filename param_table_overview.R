@@ -30,7 +30,7 @@ make_param_gt <- function(highlighted_scheme){
 
 all_schemes <- readRDS("secret/all_peers.rds")
 
-peers_activity_params <- activity_mitigators |> 
+peers_activity_params_yesno <- activity_mitigators |> 
   dplyr::select(-value_1, -value_2) |> 
   dplyr::mutate(flag = 1) |> 
   tidyr::pivot_wider(names_from = "peer", values_from = "flag") |> 
@@ -73,8 +73,9 @@ peers_activity_params <- activity_mitigators |>
                     highlighted_scheme,
                     tidyselect::everything())
   
+# heatmap style ----
 
-gt::gt(peers_activity_params) |> 
+gt::gt(peers_activity_params_yesno) |> 
   gt::fmt_markdown(columns = c(tidyselect::everything(), 
                                -activity_type,
                                -strategy,
@@ -120,4 +121,197 @@ gt::gt(peers_activity_params) |>
 }
 
 make_param_gt("RCX")
+
+# simple style ----
+
+gt::gt(peers_activity_params |> 
+         dplyr::rename("Your Scheme" = highlighted_scheme) |> 
+         dplyr::select(-parameter),
+       #groupname_col = "activity_type"
+       ) |> 
+  gt::fmt_markdown(columns = c(tidyselect::everything(), 
+                               -activity_type,
+                               -strategy,
+                              # -parameter,
+                               -perc_peers_picked)
+  ) |> 
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "gold"),
+    values = "&#10003;"
+  ) |>
+  gt::tab_style_body(
+    style = gt::cell_text(color = "gold"),
+    values = "&#10003;"
+  ) |>
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "grey20"),
+    values = "&#10005;"
+  ) |> 
+  gt::tab_style_body(
+    style = gt::cell_text(color = "grey20"),
+    values = "&#10005;"
+  ) |>
+  gt::tab_style(
+    style = list(
+      gt::cell_borders(
+        sides = c("left", "right"),
+        color = "grey50",
+        weight = gt::px(5)
+      )
+    ),
+    locations = list(
+      gt::cells_body(
+        columns = "Your Scheme"
+      ),
+      gt::cells_column_labels(
+        columns = "Your Scheme"
+      )
+    )
+  ) |>
+  gt::tab_style(
+    style = list(
+      gt::cell_borders(
+        sides = c("left", "right"),
+        color = "grey50",
+        weight = gt::px(1.5)
+      )
+    ),
+    locations = gt::cells_body(
+      #columns = "Scheme 1"
+    )
+  ) |>
+  gt::cols_align(align = "center") |> 
+  gt::grand_summary_rows(columns = c(tidyselect::everything(),
+                                     -activity_type,
+                                     -strategy,
+                                     #-parameter,
+                                     -perc_peers_picked
+  ),
+  fns = perc_params_picked ~ scales::label_percent()
+  (sum(stringr::str_detect("&#10003;", .x))/
+      length(.x)),
+  side = "top") |> 
+  gt::tab_header(title = unique(peers_activity_params$parameter)) |> 
+  gt::tab_stubhead(label = activity_type)
+  
+# range heat map ----
+
+param_certainty_data <- activity_mitigators |> 
+  dplyr::mutate(range_val = value_2-value_1,
+                #range_text = paste(value_1, value_2, sep = " - ")
+                ) |> 
+  dplyr::select(-value_1,
+                -value_2) |>
+  #dplyr::arrange(range_val) |> 
+  #dplyr::mutate(certainty = dplyr::case_when(range_val < .25 ~ "High Certainty (range < .25)",
+   #                                   range_val < .50 ~ "Moderate Certainty (range < .50)",
+    #                                  range_val < .75 ~ "Low Certainty (range < .75)",
+     #                                 range_val < .100 ~ "Uncertain (range  <= 1.000)",
+      #                                T ~ NA)) |>
+  #dplyr::select(-range_val) |> 
+  #dplyr::mutate(factor_tmp = factor(range_text, 
+   #                                 levels = unique(range_val)))
+  #dplyr::mutate(factor_tmp = factor(range_val,
+   #                                 levels = unique(range_val),
+    #                                labels = range_text)
+  tidyr::pivot_wider(names_from = "peer", values_from = "range_val") |> 
+  dplyr::rename_with(
+    ~paste("Scheme", c(1:(length(all_schemes)-1))), 
+    (c(tidyselect::everything(), 
+       -activity_type,
+       -strategy,
+       -parameter,
+       -highlighted_scheme))) |> 
+  dplyr::select(activity_type,
+                strategy,
+                parameter,
+                highlighted_scheme,
+                tidyselect::everything())
+  
+
+
+gt::gt(param_certainty_data |> 
+         dplyr::rename("Your Scheme" = highlighted_scheme) |> 
+         dplyr::select(-parameter),
+       groupname_col = "activity_type"
+) |> 
+  # gt::fmt_markdown(columns = c(tidyselect::everything(), 
+  #                              -activity_type,
+  #                              -strategy,
+  #                              # -parameter,
+  #                              #-perc_peers_picked
+  #                              )
+  # ) |> 
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "red",
+                          alpha = 0.5),
+    fn = function(x) x >= 0 &  x < .25
+  ) |> 
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "orange",
+                          alpha = 0.5),
+    fn = function(x) x >= .25 & x < .50
+  ) |> 
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "gold",
+                          alpha = 0.5),
+    fn = function(x) x >= .5 & x < .75
+  ) |> 
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "yellow",
+                          alpha = 0.5),
+    fn = function(x) x >= .75 & x < 1
+  ) |> 
+  gt::tab_style_body(
+    style = gt::cell_text(color = "grey70"),
+    fn = function(x) is.na(x)
+  ) |>
+  gt::tab_style_body(
+    style = gt::cell_fill(color = "grey70"),
+    fn = function(x) is.na(x)
+  ) |> 
+  gt::tab_style(
+    style = list(
+      gt::cell_borders(
+        sides = c("left", "right"),
+        color = "grey50",
+        weight = gt::px(5)
+      )
+    ),
+    locations = list(
+      gt::cells_body(
+        columns = "Your Scheme"
+      ),
+      gt::cells_column_labels(
+        columns = "Your Scheme"
+      )
+    )
+  ) |>
+  gt::tab_style(
+    style = list(
+      gt::cell_borders(
+        sides = c("left", "right"),
+        color = "grey50",
+        weight = gt::px(1.5)
+      )
+    ),
+    locations = gt::cells_body(
+      #columns = "Scheme 1"
+    )
+  ) |>
+  gt::cols_align(align = "center") |> 
+  #gt::grand_summary_rows(columns = c(tidyselect::everything(),
+   #                                  -activity_type,
+    #                                 -strategy,
+                                     #-parameter,
+                                     #-perc_peers_picked
+  #),
+  #fns = perc_params_picked ~ scales::label_percent()
+  #(sum(stringr::str_detect("&#10003;", .x))/
+   #   length(.x)),
+  #side = "top") |> 
+  gt::tab_header(title = unique(peers_activity_params$parameter)) |> 
+  gt::tab_stubhead(label = "activity_type")
+
+
 
