@@ -11,5 +11,5 @@ Before you begin, put each scheme's json results file in `data/jsons/` (this man
 Then run:
 
 1. `01_process-data.R` to create `all_peers.rds` and `plot_data.rds` in `outputs/processed-data/` (these files are required for producing reports and tables).
-2. `02_generate-reports.R` to render peers' parameters reports to `outputs/reports/` for each scheme.
+2. `02_generate-reports.R` to render the peers' parameters report template in `outputs/reports/activity_mitigators_template.qmd` to a separate HTML file in `outputs/reports/` for each scheme.
 3. `03_generate-tables.R`  to create mitigator coverage tables (binary and certainty heatmap) in `outputs/tables/` for each scheme.

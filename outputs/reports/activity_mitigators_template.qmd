@@ -26,11 +26,11 @@ The graphs also display the NEE recommended High and Low values.
 ```{r, echo = F, warning = F, results = "asis"}
 # Paths are relative to where the template is knitted from, i.e. templates/
 
-source("../R/plot_activity_mitigator_fun.R")
+source("../../R/plot_activity_mitigator_fun.R")
 
-all_schemes <- readRDS("../outputs/processed-data/all_peers.rds")
+all_schemes <- readRDS("../processed-data/all_peers.rds")
 
-df <- readRDS("../outputs/processed-data/plot_data.rds") |>
+df <- readRDS("../processed-data/plot_data.rds") |>
   dplyr::mutate(
     highlighted_scheme = params$selected_peer,
     all_schemes = list(all_schemes)

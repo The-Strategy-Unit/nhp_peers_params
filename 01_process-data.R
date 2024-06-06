@@ -74,4 +74,4 @@ plot_data <- activity_mitigators |>
   ) |>
   dplyr::arrange(activity_type, strategy, time_profile)
 
-readr::write_rds(plot_data, "outputs/processed-data/plot_data.rds")
+saveRDS(plot_data, "outputs/processed-data/plot_data.rds")
