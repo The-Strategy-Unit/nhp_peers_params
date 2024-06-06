@@ -1,16 +1,31 @@
 # Data/outputs
 *.csv
+*.doc
+*.docx
+*.dot
 *.html
+*.jpeg
+*.jpg
 *.json
 *.ods
-*.[r|R][d|D][s|S]
-*.[r|R]da
-*.[r|R]data
+*.pdf
+*.png
+*.[rR][dD][sS]
+*.[rR][dD]a
+*.[rR][dD]ata
+*.svg
+*.tiff
 *.xls
 *.xlsx
+*.yaml
+*.yml
 
-# Folders
-sandbox/
+# Data allowed
+!golem-config.yml
+!mitigators.json
+
+# Other allowed files
+!.Renviron.example
 
 # History files
 .Rhistory

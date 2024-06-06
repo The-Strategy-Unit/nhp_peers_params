@@ -1,11 +1,15 @@
-1. funs_get_param.R has modified functions from nhp inputs (or outputs?) app to get values out of parameter list
+# nhp_peers_params
 
-2. activity_mitigators.R sources funs_get_param.R and reads model json files found in "secret/jsons/". the first 3 characters of json file is used to extract scheme code. 
-This file also reads in nee results and takes percentile10 and percentile90 variables as nee hi/lo values. 
-   This file also creates all_peers.rds and plot_data.rds in secret folder.
+## Purpose
 
-3. plot_activity_mitigator_fun.R is function used to create plots.
+Generate automated reports that present visually each scheme's selected mitigator values for New Hospital Programme (NHP) modelling and compare them against their peers' selections and the National Elicitation Exercise (NEE). 
 
-4. activity_mitigators_template.qmd is template quarto file used in reports and has parameterised "selected_peer". Sources plot_activity_mitigator_fun.R and reads in plot_data.rds from secret folder.
+## Instructions
 
-5. create_activity_mitigator_reports.R takes all codes from all_peers.rds and walks through them applying quarto render function.
+Before you begin, put each scheme's json results file in `data/jsons/` (this manual process will be replaced later by [reading directly from Azure](https://github.com/The-Strategy-Unit/nhp_peers_params/issues/16)). The latest scenario runs are recorded on SharePoint (for now) in the 'current_runs_for_mitigator_comparison.xlsx' file (to be replaced later by tagging final jsons in Azure). The `data/` folder should also contain `all_params.json`, `mitigators.json` and `nee_table.rds`.
+
+Then run:
+
+1. `01_process-data.R` to create `all_peers.rds` and `plot_data.rds` in `outputs/processed-data/` (these files are required for producing reports and tables).
+2. `02_generate-reports.R` to render the peers' parameters report template in `outputs/reports/activity_mitigators_template.qmd` to a separate HTML file in `outputs/reports/` for each scheme.
+3. `03_generate-tables.R`  to create mitigator coverage tables (binary and certainty heatmap) in `outputs/tables/` for each scheme.

@@ -1,0 +1,156 @@
+generate_binary_table <- function(
+    activity_mitigators,
+    highlighted_scheme,
+    all_schemes
+) {
+  
+  prepare_binary_table(activity_mitigators, highlighted_scheme, all_schemes) |>
+    dplyr::rename("Your Scheme" = highlighted_scheme) |>
+    dplyr::select(-parameter) |> 
+    gt::gt(groupname_col = "activity_type") |>
+    gt::fmt_markdown(columns = tidyselect::contains("Scheme")) |>
+    gt::tab_style_body(
+      style = gt::cell_fill(color = "gold"),
+      values = "&#10003;"
+    ) |>
+    gt::tab_style_body(
+      style = gt::cell_fill(color = "grey"),
+      values = "&#10005;"
+    ) |>
+    gt::cols_align(align = "center", columns = tidyselect::contains("Scheme")) |>
+    gt::grand_summary_rows(
+      columns = -c(activity_type, strategy, perc_peers_picked),
+      fns = perc_params_picked ~ scales::label_percent()
+      (sum(stringr::str_detect("&#10003;", .x)) / length(.x)),
+      side = "top",
+    ) |>
+    gt::cols_hide(1)
+  
+}
+
+prepare_binary_table <- function(
+    activity_mitigators,
+    highlighted_scheme,
+    all_schemes
+) {
+  
+  activity_mitigators |>
+    dplyr::select(-value_1, -value_2) |>
+    dplyr::mutate(flag = 1) |>
+    tidyr::pivot_wider(names_from = "peer", values_from = "flag") |>
+    dplyr::mutate(perc_peers_picked = scales::label_percent()(
+      rowSums(
+        dplyr::across(c(
+          tidyselect::everything(),
+          -activity_type,
+          -strategy,
+          -parameter
+        )),
+        na.rm = TRUE
+      ) /
+        length(dplyr::across(
+          c(
+            tidyselect::everything(),
+            -activity_type,
+            -strategy,
+            -parameter
+          )
+        ))
+    )) |>
+    dplyr::mutate(dplyr::across(
+      c(
+        tidyselect::everything(),
+        -activity_type,
+        -strategy,
+        -parameter,
+        -perc_peers_picked
+      ),
+      ~ ifelse(
+        is.na(.x),
+        htmltools::HTML("&#10005;"), # cross
+        htmltools::HTML("&#10003;") # tick
+      )
+    )) |>
+    dplyr::rename_with(
+      ~ paste("Scheme", c(1:(length(all_schemes) - 1))),
+      (c(
+        tidyselect::everything(),
+        -activity_type,
+        -strategy,
+        -parameter,
+        -perc_peers_picked,
+        -highlighted_scheme
+      ))
+    ) |>
+    dplyr::select(
+      activity_type,
+      strategy,
+      parameter,
+      highlighted_scheme,
+      tidyselect::everything()
+    )
+  
+}
+
+generate_certainty_table <- function(
+    activity_mitigators,
+    highlighted_scheme,
+    all_schemes
+) {
+  
+  certainty_data <- 
+    prepare_certainty_table(activity_mitigators, highlighted_scheme, all_schemes) |> 
+    dplyr::rename("Your Scheme" = highlighted_scheme) |>
+    dplyr::select(-parameter)
+  
+  lowest_certainty <- certainty_data |> 
+    dplyr::select(tidyselect::contains("Scheme")) |> 
+    max(na.rm = TRUE) 
+  
+  certainty_data |> 
+    gt::gt(groupname_col = "activity_type") |>
+    gt::data_color(
+      columns = tidyselect::contains("Scheme"),
+      palette = c("grey90","red"),
+      na_color = "white",
+      domain = c(0, lowest_certainty)
+    ) |> 
+    gt::sub_missing(missing_text = htmltools::HTML("&#10005;")) |>
+    gt::tab_style_body(
+      style = gt::cell_text(color = "grey90"),
+      fn = function(x) is.na(x)
+    ) |>
+    gt::cols_align(align = "center", columns = tidyselect::contains("Scheme")) |>
+    gt::tab_stubhead(label = "activity_type")
+  
+}
+
+prepare_certainty_table <- function(
+    activity_mitigators,
+    highlighted_scheme,
+    all_schemes
+) {
+  
+  activity_mitigators |>
+    dplyr::mutate(range_val = value_2 - value_1) |>
+    dplyr::select(-c(value_1, value_2)) |> 
+    tidyr::pivot_wider(names_from = "peer", values_from = "range_val") |>
+    dplyr::rename_with(
+      ~ paste("Scheme", c(1:(length(all_schemes) - 1))),
+      (c(
+        tidyselect::everything(),
+        -activity_type,
+        -strategy,
+        -parameter,
+        -highlighted_scheme
+      ))
+    ) |>
+    dplyr::select(
+      activity_type,
+      strategy,
+      parameter,
+      highlighted_scheme,
+      tidyselect::everything()
+    )
+  
+}
