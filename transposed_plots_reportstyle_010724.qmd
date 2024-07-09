@@ -1,0 +1,117 @@
+---
+title: "NHP Inputs Plots"
+subtitle:  "In these graphics Mitigators are column groups"
+author: ""
+date: "1 July 2024"
+format: 
+  html:
+    page-layout: full
+    fig-width: 9.5
+    fig-height: 6.5
+    self-contained: true
+editor: visual
+execute:
+  echo: false
+  warning: false
+toc: true
+toc-depth: 3
+toc-expand: false
+number-sections: true
+number-offset: 0
+---
+
+```{r}
+source("original_and_transposed_plots_script_270624.R")
+```
+
+# Trust Code Lookup
+
+```{r}
+make_trust_code_lookup()
+```
+
+# Activity Avoidance
+
+## PoD Overview Plots
+
+```{r, results='asis'}
+df_pods <- 
+  unique(df$activity_type)
+  
+purrr::walk(df_pods, 
+            plot_pod_transposed)
+
+```
+
+## Mitigator Grouped Plots
+
+```{r, results='asis'}
+df_mitigators <-
+  unique(df$Grouping) |> 
+  sort()
+
+purrr::walk2(df_mitigators,
+             8,
+             plot_mitigator_group_transposed)
+```
+
+# Efficiencies
+
+## PoD Overview Plots
+
+```{r, results='asis'}
+
+df_pods <- 
+  unique(df$activity_type)
+  
+purrr::walk(df_pods, 
+            purrr::possibly(plot_efficiencies_pod_transposed,
+                            otherwise = NULL))
+
+```
+
+## Mitigator Grouped Plots
+
+```{r, results='asis'}
+
+df_mitigators <-
+  unique(df$Grouping) |> 
+  sort()
+
+purrr::walk2(df_mitigators,
+             8,
+             purrr::possibly(plot_efficiencies_mitigator_group)) 
+```
+
+# Appendix
+
+## Notes 
+
+-   The graphs include the NEE results, shown as a grey horizontal bar with a darker grey line denoting the midpoint of the p10 and p90 values.
+
+-   The high and low values picked by each Trust are shown on the graph as a coloured line with a coloured point marking the midpoint of the high and low values.
+
+-   The Trust code has been appended with the baseline and horizon year. E.g. RHW_19_41 is a baseline of 2019 and a horizon of 2041.
+
+-   The x-axis shows the value inputted by the Trust in the NHP Inputs App. This value is shown between 0-1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the above plots.
+
+-   If a Trust has a high value of 1, this is an assumption of no reduction to activity. If a Trust has a low value of 0, this is an assumption of a total (100%) reduction in activity.
+
+## Mitigator Binary Table
+
+```{r}
+generate_binary_table_all(activity_mitigators, 
+                          all_schemes)
+```
+
+## Mitigator Code Lookup
+
+```{r}
+make_mitigator_lookup()
+```
+
+## Raw Data
+
+```{r}
+make_df_dt()
+```
