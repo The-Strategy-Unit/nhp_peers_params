@@ -154,3 +154,105 @@ prepare_certainty_table <- function(
     )
   
 }
+
+generate_binary_table_all <- function(
+    activity_mitigators,
+    #highlighted_scheme,
+    all_schemes
+) {
+  
+  prepare_binary_table_all(activity_mitigators, all_schemes) |>
+    #dplyr::rename("Your Scheme" = highlighted_scheme) |>
+    dplyr::select(-parameter) |> 
+    gt::gt(groupname_col = "activity_type") |>
+    gt::fmt_markdown(columns = tidyselect::any_of(all_schemes)) |>
+    gt::tab_style_body(
+      style = list(
+        gt::cell_fill(color = "gold")#,
+        #gt::cell_text(color = "gold")
+        ),
+      values = "&#10003;"
+    ) |>
+    gt::tab_style_body(
+      style = gt::cell_fill(color = "grey"),
+      values = "&#10005;"
+    ) |>
+    gt::cols_align(align = "center", columns = tidyselect::any_of(all_schemes)) |>
+    gt::grand_summary_rows(
+      columns = -c(activity_type, strategy, perc_peers_picked),
+      fns = perc_params_picked ~ scales::label_percent()
+      (sum(stringr::str_detect("&#10003;", .x)) / length(.x)),
+      side = "top",
+    ) |>
+    gt::cols_hide(1)
+  
+}
+
+prepare_binary_table_all <- function(
+    activity_mitigators,
+    #highlighted_scheme,
+    all_schemes
+) {
+  
+  activity_mitigators |>
+    dplyr::select(-c(value_1, 
+                     value_2,
+                     baseline_year,
+                     horizon_year,
+                     peer)) |>
+    dplyr::mutate(flag = 1) |>
+    tidyr::pivot_wider(names_from = "peer_year", values_from = "flag") |>
+    dplyr::mutate(perc_peers_picked = scales::label_percent()(
+      rowSums(
+        dplyr::across(c(
+          tidyselect::everything(),
+          -activity_type,
+          -strategy,
+          -parameter
+        )),
+        na.rm = TRUE
+      ) /
+        length(dplyr::across(
+          c(
+            tidyselect::everything(),
+            -activity_type,
+            -strategy,
+            -parameter
+          )
+        ))
+    )) |>
+    dplyr::mutate(dplyr::across(
+      c(
+        tidyselect::everything(),
+        -activity_type,
+        -strategy,
+        -parameter,
+        -perc_peers_picked
+      ),
+      ~ ifelse(
+        is.na(.x),
+        htmltools::HTML("&#10005;"), # cross
+        htmltools::HTML("&#10003;") # tick
+      )
+    )) |>
+    # dplyr::rename_with(
+    #   ~ paste("Scheme", c(1:(length(all_schemes) - 1))),
+    #   (c(
+    #     tidyselect::everything(),
+    #     -activity_type,
+    #     -strategy,
+    #     -parameter,
+    #     -perc_peers_picked,
+    #     #-highlighted_scheme
+    #   ))
+    # ) |>
+    dplyr::select(
+      activity_type,
+      strategy,
+      parameter,
+      #highlighted_scheme,
+      tidyselect::everything()
+    )
+  
+}
+
