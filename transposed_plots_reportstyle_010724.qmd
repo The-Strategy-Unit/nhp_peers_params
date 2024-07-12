@@ -9,15 +9,15 @@ format:
     fig-width: 9.5
     fig-height: 6.5
     self-contained: true
+    toc: true
+    toc-depth: 3
+    toc-expand: false
+    number-sections: true
+    number-offset: 0
 editor: visual
 execute:
   echo: false
   warning: false
-toc: true
-toc-depth: 3
-toc-expand: false
-number-sections: true
-number-offset: 0
 ---
 
 ```{r}
@@ -87,7 +87,7 @@ purrr::walk2(df_mitigators,
 
 ## Notes 
 
--   The graphs include the NEE results, shown as a grey horizontal bar with a darker grey line denoting the mean value.
+-   The graphs include the NEE results, shown as a grey horizontal bar with a darker grey line denoting the mean .
 
 -   The high and low values picked by each Trust are shown on the graph as a coloured line with a coloured point marking the midpoint of the high and low values.
 
