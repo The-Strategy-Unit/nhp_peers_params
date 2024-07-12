@@ -30,10 +30,11 @@ mitigator_lookup <- readr::read_csv("data/mitigator_name_lookup.csv") |>
 ## 0.3 read nee ----
 
 nee <- readRDS("data/nee_table.rds") |>
-  dplyr::select(param_name, percentile10, percentile90) |>
+  dplyr::select(param_name, percentile10, percentile90, mean) |>
   dplyr::mutate(
     percentile10 = percentile10 / 100,
-    percentile90 = percentile90 / 100
+    percentile90 = percentile90 / 100,
+    mean = mean / 100
   ) |> 
   dplyr::filter(!stringr::str_detect(param_name, "bads"))
 
@@ -238,7 +239,7 @@ plot_pod_transposed <- function(pod){
     dplyr::mutate(peer_year = new_peer_year) |> 
     dplyr::select(-new_peer_year) |> 
     ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
-    geom_crossbar(aes(x = percentile50, 
+    geom_crossbar(aes(x = mean, 
                       xmin = percentile90,
                       xmax = percentile10),
                   fill = "lightgrey",
@@ -313,7 +314,7 @@ plot_mitigator_group_transposed <- function(group, facet_cols){
       dplyr::mutate(peer_year = new_peer_year) |> 
       dplyr::select(-new_peer_year) |> 
     ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
-    geom_crossbar(aes(x = percentile50, 
+    geom_crossbar(aes(x = mean, 
                       xmin = percentile90,
                       xmax = percentile10),
                   fill = "lightgrey",
