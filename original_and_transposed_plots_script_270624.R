@@ -267,7 +267,7 @@ plot_pod_transposed <- function(pod){
                        labels = c(0, 0.5, 1),
                        limits = c(0,1),
                        #labels = scales::label_percent(suffix = ""),
-                       name = "Assumption input (0-1)"
+                       name = "80% Confidence Interval (0-1)"
                        #,guide = guide_axis(n.dodge=1,angle = 45)
                        
     )+
@@ -336,7 +336,7 @@ plot_mitigator_group_transposed <- function(group, facet_cols){
     scale_x_continuous(breaks = c(0, 0.5, 1),
                        labels = c(0, 0.5, 1),
                        limits = c(0,1),
-                       name = "Assumption input (0-1)")+
+                       name = "80% Confidence Interval (0-1)")+
     ylab("Trust Code")+
     theme_bw() + 
     theme(panel.grid.major.y = element_blank(),
@@ -418,7 +418,7 @@ plot_efficiencies_pod_transposed <- function(pod){
       scale_x_continuous(breaks = c(0, 0.5, 1),
                          labels = c(0, 0.5, 1),
                          limits = c(0,1),
-                         name = "Assumption input (0-1)"
+                         name = "80% Confidence Interval (0-1)"
                          
                          
       )+
@@ -486,7 +486,7 @@ plot_efficiencies_mitigator_group <- function(group, facet_cols){
       scale_x_continuous(breaks = c(0, 0.5, 1),
                          labels = c(0, 0.5, 1),
                          limits = c(0,1),
-                         name = "Assumption input (0-1)")+
+                         name = "80% Confidence Interval (0-1)")+
       ylab("Trust Code")+
       theme_bw() + 
       theme(panel.grid.major.y = element_blank(),
