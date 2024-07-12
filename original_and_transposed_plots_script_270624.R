@@ -194,7 +194,7 @@ plot_mitigator_group_original <- function(group){
 }
 
 
-### 0.6.2 original plots ----
+### 0.6.2 transposed plots ----
 
 #### 0.6.2.1 Activity POD ----
 
