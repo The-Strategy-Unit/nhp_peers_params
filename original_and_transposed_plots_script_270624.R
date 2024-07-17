@@ -30,10 +30,11 @@ mitigator_lookup <- readr::read_csv("data/mitigator_name_lookup.csv") |>
 ## 0.3 read nee ----
 
 nee <- readRDS("data/nee_table.rds") |>
-  dplyr::select(param_name, percentile10, percentile90) |>
+  dplyr::select(param_name, percentile10, percentile90, mean) |>
   dplyr::mutate(
     percentile10 = percentile10 / 100,
-    percentile90 = percentile90 / 100
+    percentile90 = percentile90 / 100,
+    mean = mean / 100
   ) |> 
   dplyr::filter(!stringr::str_detect(param_name, "bads"))
 
@@ -194,7 +195,7 @@ plot_mitigator_group_original <- function(group){
 }
 
 
-### 0.6.2 original plots ----
+### 0.6.2 transposed plots ----
 
 #### 0.6.2.1 Activity POD ----
 
@@ -238,7 +239,7 @@ plot_pod_transposed <- function(pod){
     dplyr::mutate(peer_year = new_peer_year) |> 
     dplyr::select(-new_peer_year) |> 
     ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
-    geom_crossbar(aes(x = percentile50, 
+    geom_crossbar(aes(x = mean, 
                       xmin = percentile90,
                       xmax = percentile10),
                   fill = "lightgrey",
@@ -267,7 +268,7 @@ plot_pod_transposed <- function(pod){
                        labels = c(0, 0.5, 1),
                        limits = c(0,1),
                        #labels = scales::label_percent(suffix = ""),
-                       name = "Assumption input (0-1)"
+                       name = "80% Confidence Interval (0-1)"
                        #,guide = guide_axis(n.dodge=1,angle = 45)
                        
     )+
@@ -313,7 +314,7 @@ plot_mitigator_group_transposed <- function(group, facet_cols){
       dplyr::mutate(peer_year = new_peer_year) |> 
       dplyr::select(-new_peer_year) |> 
     ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
-    geom_crossbar(aes(x = percentile50, 
+    geom_crossbar(aes(x = mean, 
                       xmin = percentile90,
                       xmax = percentile10),
                   fill = "lightgrey",
@@ -336,7 +337,7 @@ plot_mitigator_group_transposed <- function(group, facet_cols){
     scale_x_continuous(breaks = c(0, 0.5, 1),
                        labels = c(0, 0.5, 1),
                        limits = c(0,1),
-                       name = "Assumption input (0-1)")+
+                       name = "80% Confidence Interval (0-1)")+
     ylab("Trust Code")+
     theme_bw() + 
     theme(panel.grid.major.y = element_blank(),
@@ -418,7 +419,7 @@ plot_efficiencies_pod_transposed <- function(pod){
       scale_x_continuous(breaks = c(0, 0.5, 1),
                          labels = c(0, 0.5, 1),
                          limits = c(0,1),
-                         name = "Assumption input (0-1)"
+                         name = "80% Confidence Interval (0-1)"
                          
                          
       )+
@@ -486,7 +487,7 @@ plot_efficiencies_mitigator_group <- function(group, facet_cols){
       scale_x_continuous(breaks = c(0, 0.5, 1),
                          labels = c(0, 0.5, 1),
                          limits = c(0,1),
-                         name = "Assumption input (0-1)")+
+                         name = "80% Confidence Interval (0-1)")+
       ylab("Trust Code")+
       theme_bw() + 
       theme(panel.grid.major.y = element_blank(),
@@ -510,8 +511,8 @@ make_mitigator_lookup <- function(){
     dplyr::mutate(dplyr::across(tidyselect::everything(),
                                 factor)) |> 
     #dplyr::select(-`Strategy variable`) |> 
-    DT::datatable(options = list(dom = 'ft',
-                                 pageLength = nrow(mitigator_groups)),
+    DT::datatable(options = list(dom = 'ftp',
+                                 pageLength = 5),
                   filter = "top")
 }
 
@@ -530,8 +531,8 @@ make_df_dt <- function(){
                                   point_or_range),
                                 factor)) |> 
     DT::datatable(extensions = 'Buttons',
-                  options = list(dom = 'Bft',
-                                 pageLength = nrow(df),
+                  options = list(dom = 'Bftp',
+                                 pageLength = 5,
                                  buttons = list( 
                                    list(extend = "csv",   
                                         filename = "nhp_inputs_raw_data",
@@ -588,8 +589,8 @@ make_trust_code_lookup <- function(){
     dplyr::select(peer, `Name of Trust`, tidyselect::everything()) |> 
     dplyr::mutate(dplyr::across(tidyselect::everything(),
                                 factor)) |>
-      DT::datatable(options = list(dom = 'ft',
-                                   pageLength = nrow(mitigator_groups)),
+      DT::datatable(options = list(dom = 'ftp',
+                                   pageLength = 5),
                     filter = "top")
       
 }
