@@ -16,11 +16,46 @@ purrr::walk(
 
 ## 0.1 read data ----
 
-params <- list.files("data/jsons/", pattern = ".json$", full.names = TRUE) |>
-  purrr::map(jsonlite::read_json) |>
-  purrr::map(purrr::pluck("params"))
+# Isolate metadata for model-runs that have a run_stage metadata label on Azure
+fetch_labelled_runs_meta <- function(container) {
+  
+  result_sets <- su.azure::get_nhp_result_sets(container)
+  
+  # Factor levels to order run_stage by
+  run_stages <- c(
+    "final_report_ndg2",  # first level because it's preferred
+    "final_report_ndg1",
+    "intermediate_ndg2",
+    "intermediate_ndg1",
+    "initial_ndg2",
+    "initial_ndg1"
+  )
+  
+  latest_labelled_runs <- result_sets |>
+    dplyr::filter(!is.na(run_stage)) |>
+    dplyr::select(dataset, run_stage, file) |> 
+    dplyr::mutate(run_stage = forcats::fct(run_stage, levels = run_stages)) |>
+    dplyr::arrange(dataset, run_stage) |>  # run_stage will be ordered by level
+    dplyr::slice(1, .by = dataset)  # isolates the 'top' level within a scheme
+  
+}
 
+# Read json files given Azure paths
+fetch_labelled_runs_params <- function(runs_meta, container) {
+  runs_meta |>
+    dplyr::pull(file) |>  # paths to jsons
+    purrr::map(\(file) {
+      message("Reading ", file, "\n")
+      su.azure::get_nhp_results(container, file)
+    }) |>
+    purrr::map(purrr::pluck("params")) |> 
+    purrr::set_names(runs_meta$dataset)  # name with scheme code
+}
 
+container <- su.azure::get_container()  # relies on .Renviron variables
+runs_meta <- fetch_labelled_runs_meta(container)  # exposes run_stage metadata
+params <- fetch_labelled_runs_params(runs_meta, container)
+  
 ## 0.2 read mitigator name look up ----
 
 mitigator_lookup <- readr::read_csv("data/mitigator_name_lookup.csv") |> 
