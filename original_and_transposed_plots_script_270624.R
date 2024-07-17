@@ -511,8 +511,8 @@ make_mitigator_lookup <- function(){
     dplyr::mutate(dplyr::across(tidyselect::everything(),
                                 factor)) |> 
     #dplyr::select(-`Strategy variable`) |> 
-    DT::datatable(options = list(dom = 'ft',
-                                 pageLength = nrow(mitigator_groups)),
+    DT::datatable(options = list(dom = 'ftp',
+                                 pageLength = 10),
                   filter = "top")
 }
 
@@ -531,8 +531,8 @@ make_df_dt <- function(){
                                   point_or_range),
                                 factor)) |> 
     DT::datatable(extensions = 'Buttons',
-                  options = list(dom = 'Bft',
-                                 pageLength = nrow(df),
+                  options = list(dom = 'Bftp',
+                                 pageLength = 10,
                                  buttons = list( 
                                    list(extend = "csv",   
                                         filename = "nhp_inputs_raw_data",
@@ -589,8 +589,8 @@ make_trust_code_lookup <- function(){
     dplyr::select(peer, `Name of Trust`, tidyselect::everything()) |> 
     dplyr::mutate(dplyr::across(tidyselect::everything(),
                                 factor)) |>
-      DT::datatable(options = list(dom = 'ft',
-                                   pageLength = nrow(mitigator_groups)),
+      DT::datatable(options = list(dom = 'ftp',
+                                   pageLength = 10),
                     filter = "top")
       
 }
