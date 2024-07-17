@@ -25,6 +25,8 @@ fetch_labelled_runs_meta <- function(container) {
   run_stages <- c(
     "final_report_ndg2",  # first level because it's preferred
     "final_report_ndg1",
+    "intermediate_ndg2",
+    "intermediate_ndg1",
     "initial_ndg2",
     "initial_ndg1"
   )
