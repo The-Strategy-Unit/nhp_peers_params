@@ -512,7 +512,7 @@ make_mitigator_lookup <- function(){
                                 factor)) |> 
     #dplyr::select(-`Strategy variable`) |> 
     DT::datatable(options = list(dom = 'ftp',
-                                 pageLength = 10),
+                                 pageLength = 5),
                   filter = "top")
 }
 
@@ -532,7 +532,7 @@ make_df_dt <- function(){
                                 factor)) |> 
     DT::datatable(extensions = 'Buttons',
                   options = list(dom = 'Bftp',
-                                 pageLength = 10,
+                                 pageLength = 5,
                                  buttons = list( 
                                    list(extend = "csv",   
                                         filename = "nhp_inputs_raw_data",
@@ -590,7 +590,7 @@ make_trust_code_lookup <- function(){
     dplyr::mutate(dplyr::across(tidyselect::everything(),
                                 factor)) |>
       DT::datatable(options = list(dom = 'ftp',
-                                   pageLength = 10),
+                                   pageLength = 5),
                     filter = "top")
       
 }
