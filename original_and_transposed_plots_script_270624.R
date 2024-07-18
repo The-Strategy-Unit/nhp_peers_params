@@ -141,9 +141,15 @@ df <- skeleton_df |>
   dplyr::mutate(percentile50 = percentile10 - (percentile10-percentile90)/2,
                 point_or_range = ifelse((value_2 - value_1) == 0,
                                         "point",
-                                        "range")
+                                        "range"),
+                peer_year = dplyr::case_match(
+                  run_stage,
+                  "Final" ~ paste0(peer_year, "*"),
+                  .default = peer_year
+                )
   ) |> 
-  dplyr::arrange(`Mitigator code`)
+  dplyr::arrange(`Mitigator code`) |> 
+  dplyr::filter(!is.na(value_1))  # only show rows where mitigator was used
   
   
 

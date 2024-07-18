@@ -1,8 +1,6 @@
 ---
-title: "NHP Inputs Plots"
-subtitle:  "In these graphics Mitigators are column groups"
-author: ""
-date: "1 July 2024"
+title: "NHP Inputs Report"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
 format: 
   html:
     page-layout: full
@@ -85,13 +83,15 @@ purrr::walk2(df_mitigators,
 
 # Appendix
 
-## Notes 
+## Notes
 
 -   The graphs include the NEE results, shown as a grey horizontal bar with a darker grey line denoting the mean .
 
 -   The high and low values picked by each Trust are shown on the graph as a coloured line with a coloured point marking the midpoint of the high and low values.
 
 -   The Trust code has been appended with the baseline and horizon year. E.g. RHW_19_41 is a baseline of 2019 and a horizon of 2041.
+
+-   The code will be suffixed with an asterisk if the scenario for that scheme is considered the 'final' run stage by that scheme (e.g. RHW_19_41\*). Other scenarios are either 'initial' or 'intermediate' (in development) runs. See the trust code lookup table or the raw data download for details.
 
 -   The x-axis shows the value inputted by the Trust in the NHP Inputs App. This value is shown between 0-1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the above plots.
 
