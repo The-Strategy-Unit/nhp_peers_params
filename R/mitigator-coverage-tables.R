@@ -304,7 +304,9 @@ prepare_midpoint_table_all <- function(
                      baseline_year,
                      horizon_year,
                      peer,
-                     range_val)) |> 
+                     range_val,
+                     scenario,
+                     run_stage)) |> 
     tidyr::pivot_wider(names_from = "peer_year", values_from = "midpoint") |>
     dplyr::select(
       activity_type,
