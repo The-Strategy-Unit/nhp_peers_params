@@ -199,7 +199,10 @@ prepare_binary_table_all <- function(
                      value_2,
                      baseline_year,
                      horizon_year,
-                     peer)) |>
+                     peer,
+                     scenario,
+                     run_stage
+                     )) |>
     dplyr::mutate(flag = 1) |>
     tidyr::pivot_wider(names_from = "peer_year", values_from = "flag") |>
     dplyr::mutate(perc_peers_picked = scales::label_percent()(
