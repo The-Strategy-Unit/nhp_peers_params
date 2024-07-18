@@ -33,10 +33,16 @@ fetch_labelled_runs_meta <- function(container) {
   
   latest_labelled_runs <- result_sets |>
     dplyr::filter(!is.na(run_stage)) |>
-    dplyr::select(dataset, run_stage, file) |> 
+    dplyr::select(dataset, scenario, run_stage, file) |> 
     dplyr::mutate(run_stage = forcats::fct(run_stage, levels = run_stages)) |>
     dplyr::arrange(dataset, run_stage) |>  # run_stage will be ordered by level
-    dplyr::slice(1, .by = dataset)  # isolates the 'top' level within a scheme
+    dplyr::slice(1, .by = dataset) |>  # isolates the 'top' level within a scheme
+    dplyr::mutate(
+      run_stage = run_stage |> 
+        as.character() |>  # convert from factor
+        stringr::str_remove("(_report)?_ndg\\d") |> 
+        stringr::str_to_sentence()  # 'Initial', 'Intermediate', 'Final'
+    )
   
 }
 
@@ -97,7 +103,11 @@ extracted_params <- params |>
                                    "_",
                                    stringr::str_sub(
                                      horizon_year, 3, 4)
-  )) 
+  )) |> 
+  dplyr::left_join(
+    runs_meta |> dplyr::select(dataset, scenario, run_stage),
+    by = dplyr::join_by("peer" == "dataset")
+  )
 
 skeleton_df <- tidyr::expand_grid("strategy" = unique(extracted_params$strategy), 
                                   "peer_year" = unique(extracted_params$peer_year)) |> 
@@ -131,9 +141,16 @@ df <- skeleton_df |>
   dplyr::mutate(percentile50 = percentile10 - (percentile10-percentile90)/2,
                 point_or_range = ifelse((value_2 - value_1) == 0,
                                         "point",
-                                        "range")
+                                        "range"),
+                peer_year = dplyr::case_match(
+                  run_stage,
+                  "Final" ~ paste0(peer_year, "*"),
+                  .default = peer_year
+                )
   ) |> 
-  dplyr::arrange(`Mitigator code`)
+  dplyr::arrange(`Mitigator code`) |> 
+  dplyr::filter(!is.na(value_1))  # only show rows where mitigator was used
+  
   
 
 ## 0.6 plot funs ----
@@ -555,6 +572,7 @@ make_mitigator_lookup <- function(){
 
 make_df_dt <- function(){
   df |> 
+    dplyr::filter(!is.na(value_1)) |>  # only show rows where mitigator was used
     dplyr::mutate(dplyr::across(c(activity_type,
                                   strategy,
                                   time_profile,
@@ -563,8 +581,35 @@ make_df_dt <- function(){
                                   peer_year,
                                   `Mitigator code`,
                                   Grouping,
-                                  point_or_range),
+                                  point_or_range,
+                                  scenario,
+                                  run_stage),
                                 factor)) |> 
+    dplyr::select(
+      # Scheme info
+      "Scheme code" = peer,
+      # Run info
+      Scenario = scenario,
+      "Run stage" = run_stage,
+      "Baseline year" = baseline_year,
+      "Horizon year" = horizon_year,
+      # Mitigator info
+      "Mitigator code",
+      Mitigator = strategy,
+      "Mitigator group" = Grouping,
+      "Activity type" = activity_type,
+      "Mitigator type" = parameter,
+      Low = value_1,
+      High = value_2,
+      Midpoint = midpoint,
+      point_or_range,
+      "Time profile" = time_profile,
+      # NEE
+      "NEE p10" = percentile10,
+      "NEE p50" = percentile50,
+      "NEE p90" = percentile90,
+      "NEE mean" = mean
+    ) |> 
     DT::datatable(extensions = 'Buttons',
                   options = list(dom = 'Bftp',
                                  pageLength = 5,
@@ -610,7 +655,9 @@ make_trust_code_lookup <- function(){
     dplyr::select(peer,
                   peer_year,
                   baseline_year,
-                  horizon_year) |> 
+                  horizon_year,
+                  scenario,
+                  run_stage) |> 
    dplyr::filter(!is.na(peer)) |> 
     dplyr::group_by(
       dplyr::pick(tidyselect::everything())) |> 
@@ -621,9 +668,18 @@ make_trust_code_lookup <- function(){
                                      `Trust ODS Code`,
                                      `Name of Hospital site`),
                      by = c(peer = "Trust ODS Code")) |> 
-    dplyr::select(peer, `Name of Trust`, tidyselect::everything()) |> 
+    dplyr::ungroup() |> 
+    dplyr::select(
+      "Scheme code" = peer,
+      "Site name" = "Name of Hospital site",
+      Scenario = scenario,
+      "Run stage" = run_stage,
+      "Baseline year" = baseline_year,
+      "Horizon year" = horizon_year
+    ) |> 
+    dplyr::arrange(`Site name`) |> 
     dplyr::mutate(dplyr::across(tidyselect::everything(),
-                                factor)) |>
+                                factor)) |> 
       DT::datatable(options = list(dom = 'ftp',
                                    pageLength = 5),
                     filter = "top")
