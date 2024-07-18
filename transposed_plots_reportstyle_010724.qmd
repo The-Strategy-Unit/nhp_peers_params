@@ -85,7 +85,7 @@ purrr::walk2(df_mitigators,
 
 # Appendix
 
-## Notes 
+## Notes
 
 -   The graphs include the NEE results, shown as a grey horizontal bar with a darker grey line denoting the mean .
 
@@ -102,6 +102,13 @@ purrr::walk2(df_mitigators,
 ```{r}
 generate_binary_table_all(activity_mitigators, 
                           all_schemes)
+```
+
+## Mitigator Midpoint Table 
+
+```{r}
+generate_midpoint_table_all(activity_mitigators,
+                            all_schemes)
 ```
 
 ## Mitigator Code Lookup
