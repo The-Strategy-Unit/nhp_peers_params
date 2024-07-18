@@ -259,3 +259,60 @@ prepare_binary_table_all <- function(
   
 }
 
+
+generate_midpoint_table_all <- function(
+    activity_mitigators,
+    all_schemes
+) {
+  
+  midpoint_data <- 
+    prepare_midpoint_table_all(activity_mitigators, all_schemes) |> 
+    dplyr::select(-parameter)
+  
+  # lowest_certainty <- certainty_data |> 
+  #   dplyr::select(tidyselect::contains("Scheme")) |> 
+  #   max(na.rm = TRUE) 
+  
+  midpoint_data |> 
+    gt::gt(groupname_col = "activity_type") |>
+    gt::data_color(
+      columns = tidyselect::any_of(all_schemes),
+      palette = c("darkblue","skyblue"),
+      na_color = "grey80",
+      domain = c(0, 1)
+    ) |> 
+    gt::sub_missing(missing_text = htmltools::HTML("&#10005;")) |>
+    gt::tab_style_body(
+      style = gt::cell_text(color = "grey90"),
+      fn = function(x) is.na(x)
+    ) |>
+    gt::cols_align(align = "center", columns = tidyselect::any_of(all_schemes)) |>
+    gt::tab_stubhead(label = "activity_type")
+  
+}
+
+prepare_midpoint_table_all <- function(
+    activity_mitigators,
+    all_schemes
+) {
+  
+  activity_mitigators |>
+    dplyr::mutate(range_val = value_2 - value_1,
+                  midpoint = value_1 + ((value_2-value_1)/2)) |>
+    dplyr::select(-c(value_1, 
+                     value_2,
+                     baseline_year,
+                     horizon_year,
+                     peer,
+                     range_val)) |> 
+    tidyr::pivot_wider(names_from = "peer_year", values_from = "midpoint") |>
+    dplyr::select(
+      activity_type,
+      strategy,
+      parameter,
+      tidyselect::everything()
+    )
+   
+  
+}
+
