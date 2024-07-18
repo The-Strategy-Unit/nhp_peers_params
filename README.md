@@ -6,6 +6,13 @@ Generate an automated report that presents visually each scheme's selected mitig
 
 ## Instructions
 
-The `data/` folder should also contain `all_params.json`, `mitigators.json` and `nee_table.rds`.
+Put in the `data/` folder the following supporting files:
 
-Then render `transposed_plots_reportstyle_010724.qmd` to produce the report.
+* `all_params.json`
+* `mitigators.json`
+* `nee_table.rds`
+* `mitigator_name_lookup.csv`
+* `mitigator groupings.xlsx`
+* `NHP_trust_code_lookup.xlsx`
+
+Then open and render `transposed_plots_reportstyle_010724.qmd` to produce the HTML report.
