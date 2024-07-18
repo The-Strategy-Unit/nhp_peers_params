@@ -630,6 +630,13 @@ make_trust_code_lookup <- function(){
       
 }
 
+
+# 0.11 make heatmap midpoint ----
+
+generate_midpoint_table_all(activity_mitigators, 
+                          all_schemes)
+
+
 #//--SCRAP--\\ ----
 
 # 1.0 original plots ----
