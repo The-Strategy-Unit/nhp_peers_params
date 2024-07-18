@@ -413,7 +413,7 @@ plot_efficiencies_pod_transposed <- function(pod){
   cat("###", pod, "{.hide}", "\n")
   
   if(pod == "ip"){
-    facet_cols = 11
+    facet_cols = 9
     wrap_width = 17
     facet_font = 6
   }else{
@@ -466,7 +466,7 @@ plot_efficiencies_pod_transposed <- function(pod){
                  
                  #nrow = 2,
                  labeller = label_wrap_gen(width = wrap_width),
-                 #ncol = facet_cols
+                 ncol = facet_cols
       )+
       scale_x_continuous(breaks = c(0, 0.5, 1),
                          labels = c(0, 0.5, 1),
