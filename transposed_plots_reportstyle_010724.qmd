@@ -109,8 +109,11 @@ generate_binary_table_all(activity_mitigators,
 ```{r}
 generate_midpoint_table_all(activity_mitigators,
                             all_schemes)
+```
 
 ## Mitigator Code Lookup
+
+```{r}
 
 make_mitigator_lookup()
 ```
