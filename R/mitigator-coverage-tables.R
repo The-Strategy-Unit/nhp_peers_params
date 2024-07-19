@@ -272,7 +272,20 @@ midpoint_pal_fun <- function(x){
   
   pal(range)
 }
-
+transform_fun <- function(x){
+  #string <- stringr::str_split(x, "\\s(?=\\()")
+  #midpoint <- string[1]
+  #range <- string[2]
+  
+  paste0('<font size="+1">',
+         stringr::str_split(x, "\\s(?=\\()")[1],
+         "</font>",
+         "<br>",
+         '<font size="-1">',
+         "(",
+         stringr::str_split(x, "\\s(?=\\()")[2],
+         ")",
+         "</font>")}
 
 generate_midpoint_table_all <- function(
     activity_mitigators,
@@ -309,8 +322,12 @@ generate_midpoint_table_all <- function(
     #) |> 
     #gt::tab_style_body(columns = tidyselect::any_of(all_schemes)) |> 
     gt::cols_align(align = "center", columns = tidyselect::any_of(all_schemes)) |>
-    gt::tab_stubhead(label = "activity_type") |> 
-    gt::as_raw_html()
+    gt::tab_stubhead(label = "activity_type") #|>
+    #gt::text_transform(fn = transform_fun,
+     #                locations =
+      #                gt::cells_body(columns = tidyselect::any_of(all_schemes))) |>
+    #  })
+   # gt::as_raw_html()
   
 }
 
@@ -321,18 +338,22 @@ prepare_midpoint_table_all <- function(
   
   activity_mitigators |>
     dplyr::mutate(range_val = value_2 - value_1,
-                  range_label = ifelse(range_val == 0,
+                  range_label_tmp = ifelse(range_val == 0,
                                        "Point Estimate",
                                        paste0(value_1, 
                                               " - ",
                                               value_2)),
                   midpoint = value_1 + ((value_2-value_1)/2),
-                  value_label = paste0('<font size="+1">',
+                  value_label = paste0('<font size=+1>',
                                        midpoint, 
+                                       " ",
                                        "</font>","<br>",
-                                       '<font size="-1">(',
-                                       range_label,
-                                       ")</font>")) |>
+                                       '<font size=-1>',
+                                       "(",
+                                       range_label_tmp,
+                                       ")",
+                                       "</font>"
+                                       )) |>
     dplyr::select(-c(value_1, 
                      value_2,
                      baseline_year,
@@ -342,7 +363,7 @@ prepare_midpoint_table_all <- function(
                      scenario,
                      run_stage,
                      midpoint,
-                     range_label)) |> 
+                     range_label_tmp)) |> 
     tidyr::pivot_wider(names_from = "peer_year", values_from = "value_label") |>
     dplyr::select(
       activity_type,
