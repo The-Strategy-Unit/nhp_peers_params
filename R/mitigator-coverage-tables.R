@@ -272,20 +272,6 @@ midpoint_pal_fun <- function(x){
   
   pal(range)
 }
-transform_fun <- function(x){
-  #string <- stringr::str_split(x, "\\s(?=\\()")
-  #midpoint <- string[1]
-  #range <- string[2]
-  
-  paste0('<font size="+1">',
-         stringr::str_split(x, "\\s(?=\\()")[1],
-         "</font>",
-         "<br>",
-         '<font size="-1">',
-         "(",
-         stringr::str_split(x, "\\s(?=\\()")[2],
-         ")",
-         "</font>")}
 
 generate_midpoint_table_all <- function(
     activity_mitigators,
@@ -296,19 +282,12 @@ generate_midpoint_table_all <- function(
     prepare_midpoint_table_all(activity_mitigators, all_schemes) |> 
     dplyr::select(-parameter)
   
-  # lowest_certainty <- certainty_data |> 
-  #   dplyr::select(tidyselect::contains("Scheme")) |> 
-  #   max(na.rm = TRUE) 
-  
   midpoint_data |> 
     gt::gt(groupname_col = "activity_type") |>
     gt::data_color(
       columns = tidyselect::any_of(all_schemes),
-      #palette = c("black","yellow"),
-      fn = midpoint_pal_fun,
-      #na_color = "white",
-      #domain = c(0, 1)
-    ) |> 
+      fn = midpoint_pal_fun
+      ) |> 
     gt::fmt_markdown() |> 
     gt::sub_missing(missing_text = htmltools::HTML("&#10005;")) |>
     gt::tab_style_body(
@@ -319,15 +298,8 @@ generate_midpoint_table_all <- function(
       columns = tidyselect::any_of(all_schemes),
       pattern = "(Point Estimate)", 
       style = gt::cell_fill(color = "grey80")) |> 
-    #) |> 
-    #gt::tab_style_body(columns = tidyselect::any_of(all_schemes)) |> 
     gt::cols_align(align = "center", columns = tidyselect::any_of(all_schemes)) |>
-    gt::tab_stubhead(label = "activity_type") #|>
-    #gt::text_transform(fn = transform_fun,
-     #                locations =
-      #                gt::cells_body(columns = tidyselect::any_of(all_schemes))) |>
-    #  })
-   # gt::as_raw_html()
+    gt::tab_stubhead(label = "activity_type") 
   
 }
 
