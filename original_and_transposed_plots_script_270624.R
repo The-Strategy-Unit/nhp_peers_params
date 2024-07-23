@@ -253,8 +253,7 @@ plot_mitigator_group_original <- function(group){
 
 plot_pod_transposed <- function(pod){
   
-  cat(#':::{.content-visible when-format="html"}', "\n",
-      "###", pod, "{.hide}", "\n")
+  cat("\n\n###", pod, "\n")
   
   if(pod == "ip"){
     facet_cols = 11
@@ -341,7 +340,7 @@ plot_pod_transposed <- function(pod){
 #### 0.6.2.2 Activity Mitigator groupings ----
 
 plot_mitigator_group_transposed <- function(group, facet_cols){
-  cat("###", group, "{.hide}", "\n")
+  cat("\n\n###", group, "\n")
   
   colours <- tibble::tibble(
     peer_year = unique(df$peer_year[df$parameter == "activity_avoidance"]),
@@ -409,8 +408,7 @@ plot_mitigator_group_transposed <- function(group, facet_cols){
 #### 0.6.3.1 Efficiencies POD----
 plot_efficiencies_pod_transposed <- function(pod){
   
-  cat("\n")
-  cat("###", pod, "{.hide}", "\n")
+  cat("\n\n###", pod, "\n")
   
   if(pod == "ip"){
     facet_cols = 9
@@ -492,7 +490,7 @@ plot_efficiencies_pod_transposed <- function(pod){
 #### 0.6.3.2 Efficiencies Mitigtor groupings ----
 
 plot_efficiencies_mitigator_group <- function(group, facet_cols){
-  cat("###", group, "{.hide}", "\n")
+  cat("\n\n###", group, "\n")
   
   colours <- tibble::tibble(
     peer_year = unique(df$peer_year[df$parameter == "efficiencies"]),
