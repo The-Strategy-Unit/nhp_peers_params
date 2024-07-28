@@ -1,6 +1,6 @@
 ---
 title: "NHP Inputs Report"
-date: "`r format(Sys.Date(), '%d %B %Y')`"
+date: "`r format(Sys.time(), '%d %B %Y %H:%M:%S')`"
 format: 
   html:
     page-layout: full
