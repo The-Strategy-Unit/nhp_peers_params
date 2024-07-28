@@ -29,6 +29,8 @@ source("original_and_transposed_plots_script_270624.R")
 
 -   The report contains graphs as well as heatmaps and searchable, filterable tables. The dataset that has been used is available to view and download as a csv file, this can be found at the end of the report.
 
+-   The tables throughout this report may need to be scrolled sideways to view all the columns.
+
 -   Trust codes have been used throughout to denote the different Trusts, as well as a suffix indicating their baseline and horizon years. For example, RHW_19_41 is a baseline year of 2019 and a horizon year of 2041 for the Trust RHW.
 
 -   The report compares values from Trusts' final model runs where applicable and uses values from their initial runs where runs have not been finalised. A final run is marked in the graphics with an "\*" after the Trust Code.
@@ -122,6 +124,7 @@ purrr::walk2(df_mitigators,
 -   This heatmap shows which Trusts have Input values for each activity mitigator. If a Trust has input a value then the cell will show a "&#10003;" with gold background. Otherwise it will show as "&#10005;" with a grey background.
 
 ```{r}
+#| column: screen-inset
 generate_binary_table_all(activity_mitigators, 
                           all_schemes)
 ```
@@ -137,22 +140,13 @@ generate_binary_table_all(activity_mitigators,
 -   If a Trust has not set a value for that mitigator then the cell will have no colour and will show a "&#10005;"
 
 ```{r}
+#| column: screen-inset
 generate_midpoint_table_all(activity_mitigators,                             all_schemes)
 ```
 
 # Appendix
 
-## Notes
-
--   The graphs include the NEE results, shown as a grey horizontal bar with a darker grey line denoting the mean .
-
--   The high and low values picked by each Trust are shown on the graph as a coloured line with a coloured point marking the midpoint of the high and low values.
-
--   The Trust code has been appended with the baseline and horizon year. E.g. RHW_19_41 is a baseline of 2019 and a horizon of 2041.
-
--   The code will be suffixed with an asterisk if the scenario for that scheme is considered the 'final' run stage by that scheme (e.g. RHW_19_41\*). Other scenarios are either 'initial' or 'intermediate' (in development) runs. See the trust code lookup table or the raw data download for details.
-
--   The x-axis shows the value inputted by the Trust in the NHP Inputs App.
+## Mitigator Lookup
 
 ```{r}
 
