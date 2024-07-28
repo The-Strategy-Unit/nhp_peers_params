@@ -259,6 +259,19 @@ prepare_binary_table_all <- function(
   
 }
 
+midpoint_pal_fun <- function(x){
+  library(scales)
+  lo <- as.numeric(stringr::str_extract(x, "(?<=\\().*(?= - )"))
+  hi <- as.numeric(stringr::str_extract(x, "(?<= - ).*(?=\\))"))
+  
+  range <- hi - lo
+  pal <- scales::col_numeric("Blues",
+                             domain = c(0,1),
+                             reverse = T,
+                             na.color = "white")
+  
+  pal(range)
+}
 
 generate_midpoint_table_all <- function(
     activity_mitigators,
@@ -269,25 +282,24 @@ generate_midpoint_table_all <- function(
     prepare_midpoint_table_all(activity_mitigators, all_schemes) |> 
     dplyr::select(-parameter)
   
-  # lowest_certainty <- certainty_data |> 
-  #   dplyr::select(tidyselect::contains("Scheme")) |> 
-  #   max(na.rm = TRUE) 
-  
   midpoint_data |> 
     gt::gt(groupname_col = "activity_type") |>
     gt::data_color(
       columns = tidyselect::any_of(all_schemes),
-      palette = c("darkblue","skyblue"),
-      na_color = "grey80",
-      domain = c(0, 1)
-    ) |> 
+      fn = midpoint_pal_fun
+      ) |> 
+    gt::fmt_markdown() |> 
     gt::sub_missing(missing_text = htmltools::HTML("&#10005;")) |>
     gt::tab_style_body(
-      style = gt::cell_text(color = "grey90"),
+      style = gt::cell_text(color = "grey80"),
       fn = function(x) is.na(x)
     ) |>
+    gt::tab_style_body(
+      columns = tidyselect::any_of(all_schemes),
+      pattern = "(Point Estimate)", 
+      style = gt::cell_fill(color = "grey80")) |> 
     gt::cols_align(align = "center", columns = tidyselect::any_of(all_schemes)) |>
-    gt::tab_stubhead(label = "activity_type")
+    gt::tab_stubhead(label = "activity_type") 
   
 }
 
@@ -298,7 +310,22 @@ prepare_midpoint_table_all <- function(
   
   activity_mitigators |>
     dplyr::mutate(range_val = value_2 - value_1,
-                  midpoint = value_1 + ((value_2-value_1)/2)) |>
+                  range_label_tmp = ifelse(range_val == 0,
+                                       "Point Estimate",
+                                       paste0(value_1, 
+                                              " - ",
+                                              value_2)),
+                  midpoint = value_1 + ((value_2-value_1)/2),
+                  value_label = paste0('<font size=+1>',
+                                       midpoint, 
+                                       " ",
+                                       "</font>","<br>",
+                                       '<font size=-1>',
+                                       "(",
+                                       range_label_tmp,
+                                       ")",
+                                       "</font>"
+                                       )) |>
     dplyr::select(-c(value_1, 
                      value_2,
                      baseline_year,
@@ -306,8 +333,10 @@ prepare_midpoint_table_all <- function(
                      peer,
                      range_val,
                      scenario,
-                     run_stage)) |> 
-    tidyr::pivot_wider(names_from = "peer_year", values_from = "midpoint") |>
+                     run_stage,
+                     midpoint,
+                     range_label_tmp)) |> 
+    tidyr::pivot_wider(names_from = "peer_year", values_from = "value_label") |>
     dplyr::select(
       activity_type,
       strategy,
