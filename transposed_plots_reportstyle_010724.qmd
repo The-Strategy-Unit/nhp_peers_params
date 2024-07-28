@@ -1,6 +1,7 @@
 ---
-title: "NHP Inputs Report"
-date: "`r format(Sys.time(), '%d %B %Y %H:%M:%S')`"
+title: "NHP Mitigator Comparison Report"
+date: last-modified
+date-format: "D MMM YYYY HH:mm:ss"
 format: 
   html:
     page-layout: full
@@ -22,6 +23,16 @@ execute:
 source("original_and_transposed_plots_script_270624.R")
 ```
 
+# Introduction 
+
+-   The following report can be used to compare the activity mitigator values that Trusts have selected for parameters in the NHP Inputs App.
+
+-   The report contains graphs as well as heatmaps and searchable, filterable tables. The dataset that has been used is available to view and download as a csv file, this can be found at the end of the report.
+
+-   Trust codes have been used throughout to denote the different Trusts, as well as a suffix indicating their baseline and horizon years. For example, RHW_19_41 is a baseline year of 2019 and a horizon year of 2041 for the Trust RHW.
+
+-   The report compares values from Trusts' final model runs where applicable and uses values from their initial runs where runs have not been finalised. A final run is marked in the graphics with an "\*" after the Trust Code.
+
 # Trust Code Lookup
 
 ```{r}
@@ -29,6 +40,25 @@ make_trust_code_lookup()
 ```
 
 # Activity Avoidance
+
+-   This section contains graphs of the activity avoidance input values. The graphs show parameters grouped by point of delivery (PoD) as well as a more granular grouping of parameters.
+
+```{=html}
+<!-- -->
+```
+-   The graphs show, on the x-axis, the 80% confidence input range that Trusts have selected in the NHP Inputs App. These are shown as a horizontal coloured line, the endpoints of which are the low and high values selected in the Inputs App. The midpoint of this range is marked by a point. This value is shown between 0-1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the above plots.
+
+-   If a Trust has a high value of 1, this is an assumption of no reduction to activity. If a Trust has a low value of 0, this is an assumption of a total (100%) reduction in activity.
+
+-   If a Trust has not input a value for the mitigator then there won't be a coloured line/point for that mitigator.
+
+-   In some cases, Trusts have input a point estimate instead of a range, or the range input is very small. This will result in the line marking the range to either not exist or to be very small. In these cases, only the midpoint is able to be seen on the graphs.
+
+-   The y-axis shows the different Trust Codes. These have a suffix attached to them denoting the last two digits of the baseline and horizon years used for the model run.
+
+-   The graphs are faceted. Each facet contains a different mitigator.
+
+-   The graphs also include results from the National Elicitation Exercise (NEE). These values are shown in the graphs as a horizontal grey bar behind each point. This bar contains a darker vertical line marking the mean value for NEE. If NEE values do not exist for a parameter then no grey bar is shown.
 
 ## PoD Overview Plots
 
@@ -54,6 +84,10 @@ purrr::walk2(df_mitigators,
 ```
 
 # Efficiencies
+
+-   This section displays graphs of efficiencies input values.
+
+-   This graphs in this section follows the same approach as those in the previous section. (See previous section's introductory text for explanation of graphs)
 
 ## PoD Overview Plots
 
@@ -81,6 +115,31 @@ purrr::walk2(df_mitigators,
              purrr::possibly(plot_efficiencies_mitigator_group)) 
 ```
 
+# Heat Maps 
+
+## Mitigator Binary Table 
+
+-   This heatmap shows which Trusts have Input values for each activity mitigator. If a Trust has input a value then the cell will show a "&#10003;" with gold background. Otherwise it will show as "&#10005;" with a grey background.
+
+```{r}
+generate_binary_table_all(activity_mitigators, 
+                          all_schemes)
+```
+
+## Mitigator Midpoint Table
+
+-   The number with the larger font in each cell shows the midpoint value for each Trust and mitigator. The numbers below this in parentheses show the actual values input by the Trust.
+
+-   The background colour of each cell depends on the size of the range of the inputs selected by the Trust for that mitigator. The smaller the range the darker the colour of the cell.
+
+-   When a Trust has set a point estimate instead of a range, the cell will be coloured in grey and will show 'Point Estimate' in the parentheses.
+
+-   If a Trust has not set a value for that mitigator then the cell will have no colour and will show a "&#10005;"
+
+```{r}
+generate_midpoint_table_all(activity_mitigators,                             all_schemes)
+```
+
 # Appendix
 
 ## Notes
@@ -93,25 +152,7 @@ purrr::walk2(df_mitigators,
 
 -   The code will be suffixed with an asterisk if the scenario for that scheme is considered the 'final' run stage by that scheme (e.g. RHW_19_41\*). Other scenarios are either 'initial' or 'intermediate' (in development) runs. See the trust code lookup table or the raw data download for details.
 
--   The x-axis shows the value inputted by the Trust in the NHP Inputs App. This value is shown between 0-1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the above plots.
-
--   If a Trust has a high value of 1, this is an assumption of no reduction to activity. If a Trust has a low value of 0, this is an assumption of a total (100%) reduction in activity.
-
-## Mitigator Binary Table
-
-```{r}
-generate_binary_table_all(activity_mitigators, 
-                          all_schemes)
-```
-
-## Mitigator Midpoint Table
-
-```{r}
-generate_midpoint_table_all(activity_mitigators,
-                            all_schemes)
-```
-
-## Mitigator Code Lookup
+-   The x-axis shows the value inputted by the Trust in the NHP Inputs App.
 
 ```{r}
 
