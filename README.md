@@ -14,10 +14,11 @@ To run the report locally:
 
 1. Put in the `data/` folder the following supporting files:
     * `all_params.json`
-    * `mitigators.json`
     * `nee_table.rds`
+    * `NHP_trust_code_lookup.xlsx`
+    * `mitigators.json`
     * `mitigator_name_lookup.csv`
     * `mitigator groupings.xlsx`
-    * `NHP_trust_code_lookup.xlsx`
+    * `providers.json`
 1. Create a `.Renviron` file that contains the variables in `.Renviron.example`.
 1. Open and render `nhp-mitigators-report.qmd` to produce the HTML report.
