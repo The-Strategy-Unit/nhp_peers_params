@@ -1324,29 +1324,6 @@
       ],
       "Hash": "960e2ae9e09656611e0b8214ad543207"
     },
-    "su.azure": {
-      "Package": "su.azure",
-      "Version": "0.0.0.9000",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "su.azure",
-      "RemoteUsername": "The-Strategy-Unit",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "78156eb952b0b1ed767f53edd42dc1c822facc7a",
-      "Requirements": [
-        "AzureAuth",
-        "AzureStor",
-        "R",
-        "dplyr",
-        "jsonlite",
-        "purrr",
-        "rlang",
-        "stringr",
-        "withr"
-      ],
-      "Hash": "f90cbaa1fd1f62272dd8c8e519b4f09b"
-    },
     "sys": {
       "Package": "sys",
       "Version": "3.4.2",
