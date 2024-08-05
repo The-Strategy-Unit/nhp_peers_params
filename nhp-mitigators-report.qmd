@@ -20,7 +20,7 @@ execute:
 ---
 
 ```{r}
-source("original_and_transposed_plots_script_270624.R")
+source("nhp-mitigators-report.R")
 ```
 
 # Introduction 
