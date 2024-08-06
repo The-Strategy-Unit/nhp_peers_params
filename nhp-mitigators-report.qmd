@@ -1,8 +1,8 @@
 ---
 title: "NHP Mitigator Comparison Report"
-date: last-modified
-date-format: "D MMM YYYY HH:mm:ss"
-format: 
+date: "last-modified"
+date-format: D MMM YYYY HH:mm:ss
+format:
   html:
     page-layout: full
     fig-width: 9.5
@@ -17,10 +17,10 @@ editor: visual
 execute:
   echo: false
   warning: false
-resources: 
+resource_files:
   - data/all_params.json
   - data/all_peers.rds
-  - "data/mitigator groupings.xlsx"
+  - data/mitigator groupings.xlsx
   - data/mitigator_name_lookup.csv
   - data/nee_table.rds
   - data/NHP_trust_code_lookup.xlsx
