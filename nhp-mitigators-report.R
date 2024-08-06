@@ -10,58 +10,16 @@ library(ggplot2)
 # )
 
 purrr::walk(
-  c("R/funs_get_param.R",
-  "R/mitigator-coverage-tables.R"),
-  source)
+  paste0("R/", c("azure.R", "funs_get_param.R", "mitigator-coverage-tables.R")),
+  source
+)
 
 ## 0.1 read data ----
 
-# Isolate metadata for model-runs that have a run_stage metadata label on Azure
-fetch_labelled_runs_meta <- function(container) {
-  
-  result_sets <- su.azure::get_nhp_result_sets(container)
-  
-  # Factor levels to order run_stage by
-  run_stages <- c(
-    "final_report_ndg2",  # first level because it's preferred
-    "final_report_ndg1",
-    "intermediate_ndg2",
-    "intermediate_ndg1",
-    "initial_ndg2",
-    "initial_ndg1"
-  )
-  
-  latest_labelled_runs <- result_sets |>
-    dplyr::filter(!is.na(run_stage)) |>
-    dplyr::select(dataset, scenario, run_stage, file) |> 
-    dplyr::mutate(run_stage = forcats::fct(run_stage, levels = run_stages)) |>
-    dplyr::arrange(dataset, run_stage) |>  # run_stage will be ordered by level
-    dplyr::slice(1, .by = dataset) |>  # isolates the 'top' level within a scheme
-    dplyr::mutate(
-      run_stage = run_stage |> 
-        as.character() |>  # convert from factor
-        stringr::str_remove("(_report)?_ndg\\d") |> 
-        stringr::str_to_sentence()  # 'Initial', 'Intermediate', 'Final'
-    )
-  
-}
-
-# Read json files given Azure paths
-fetch_labelled_runs_params <- function(runs_meta, container) {
-  runs_meta |>
-    dplyr::pull(file) |>  # paths to jsons
-    purrr::map(\(file) {
-      message("Reading ", file, "\n")
-      su.azure::get_nhp_results(container, file)
-    }) |>
-    purrr::map(purrr::pluck("params")) |> 
-    purrr::set_names(runs_meta$dataset)  # name with scheme code
-}
-
-container <- su.azure::get_container()  # relies on .Renviron variables
+container <- get_container()  # relies on .Renviron variables
 runs_meta <- fetch_labelled_runs_meta(container)  # exposes run_stage metadata
 params <- fetch_labelled_runs_params(runs_meta, container)
-  
+
 ## 0.2 read mitigator name look up ----
 
 mitigator_lookup <- readr::read_csv("data/mitigator_name_lookup.csv") |> 
@@ -128,10 +86,10 @@ df <- skeleton_df |>
     nee |> 
       #tidyr::expand_grid(peer = unique(extracted_params$peer)) |> 
       dplyr::rename("strategy"  = param_name) #|> 
-      #dplyr::filter(strategy %in% unique(extracted_params$strategy)
-      ) |>
+    #dplyr::filter(strategy %in% unique(extracted_params$strategy)
+  ) |>
   dplyr::filter((value_1 <= 1 &
-                  value_2 <= 1)|
+                   value_2 <= 1)|
                   is.na(value_1) &
                   is.na(value_2)) |> 
   dplyr::mutate(midpoint = value_1 + (value_2-value_1)/2) |> 
@@ -150,8 +108,8 @@ df <- skeleton_df |>
   ) |> 
   dplyr::arrange(`Mitigator code`) |> 
   dplyr::filter(!is.na(value_1))  # only show rows where mitigator was used
-  
-  
+
+
 
 ## 0.6 plot funs ----
 ### 0.6.1 original plots ----
@@ -159,46 +117,46 @@ df <- skeleton_df |>
 
 plot_pod_original <- function(pod){
   print(
-  df |> 
-    dplyr::filter(activity_type == pod) |> 
-    ggplot(aes(x = midpoint, y = `Mitigator code`, colour = peer_year))+
-    geom_crossbar(aes(x = percentile50, 
-                      xmin = percentile90,
-                      xmax = percentile10),
-                  fill = "lightgrey",
-                  colour = "grey85",
-                  alpha = 0.2,
-                  width = 0.3)+
-    geom_pointrange(#data = ~ .x |> dplyr::filter(point_or_range == "range"),
-                    aes(x = midpoint, 
-                        xmin = value_1,
-                        xmax = value_2),
-                    size = 0.2,
-                    linewidth = 1
-    )+
-    # geom_point(data = ~ .x |> dplyr::filter(point_or_range == "point"),
-    #            shape = 4,
-    #            size = 1,
-    #            stroke = 1) +
-    facet_wrap(~peer_year,
-               nrow = 1,
-    )+
-    scale_x_continuous(breaks = c(0, 0.5, 1),
-                       limits = c(0,1),
-                       labels = scales::label_percent(suffix = ""),
-                       name = "% Reduction (assumption)"
-                       #,guide = guide_axis(n.dodge=1,angle = 45)
-                       
-    )+
-    ylab("Mitigator Code")+
-    theme_bw() + 
-    theme(panel.grid.major.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          legend.position = "none",
-          panel.spacing = unit(0.5, "lines"),
-          panel.background = element_rect(fill = NA, color = "grey20")
-    )+
-    ggtitle(paste(toupper(pod), "Overview"))
+    df |> 
+      dplyr::filter(activity_type == pod) |> 
+      ggplot(aes(x = midpoint, y = `Mitigator code`, colour = peer_year))+
+      geom_crossbar(aes(x = percentile50, 
+                        xmin = percentile90,
+                        xmax = percentile10),
+                    fill = "lightgrey",
+                    colour = "grey85",
+                    alpha = 0.2,
+                    width = 0.3)+
+      geom_pointrange(#data = ~ .x |> dplyr::filter(point_or_range == "range"),
+        aes(x = midpoint, 
+            xmin = value_1,
+            xmax = value_2),
+        size = 0.2,
+        linewidth = 1
+      )+
+      # geom_point(data = ~ .x |> dplyr::filter(point_or_range == "point"),
+      #            shape = 4,
+      #            size = 1,
+      #            stroke = 1) +
+      facet_wrap(~peer_year,
+                 nrow = 1,
+      )+
+      scale_x_continuous(breaks = c(0, 0.5, 1),
+                         limits = c(0,1),
+                         labels = scales::label_percent(suffix = ""),
+                         name = "% Reduction (assumption)"
+                         #,guide = guide_axis(n.dodge=1,angle = 45)
+                         
+      )+
+      ylab("Mitigator Code")+
+      theme_bw() + 
+      theme(panel.grid.major.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            legend.position = "none",
+            panel.spacing = unit(0.5, "lines"),
+            panel.background = element_rect(fill = NA, color = "grey20")
+      )+
+      ggtitle(paste(toupper(pod), "Overview"))
   )
 }
 
@@ -206,43 +164,43 @@ plot_pod_original <- function(pod){
 
 plot_mitigator_group_original <- function(group){
   print(
-  df |> 
-    dplyr::filter(Grouping == group) |>
-    ggplot(aes(x = midpoint, y = `Mitigator code`, colour = peer_year))+
-    geom_crossbar(aes(x = percentile50, 
-                      xmin = percentile90,
-                      xmax = percentile10),
-                  fill = "lightgrey",
-                  colour = "grey85",
-                  alpha = 0.2,
-                  width = 0.3)+
-    geom_pointrange(#data = ~ .x |> dplyr::filter(point_or_range == "range"),
-                    aes(x = midpoint, 
-                        xmin = value_1,
-                        xmax = value_2),
-                    size = 0.2,
-                    linewidth = 1
-    )+
-    # geom_point(data = ~ .x |> dplyr::filter(point_or_range == "point"),
-    #            shape = 4,
-    #            size = 1,
-    #            stroke = 1) +
-    facet_wrap(~peer_year,
-               nrow = 2,
-    )+
-    scale_x_continuous(breaks = c(0, 0.5, 1),
-                       limits = c(0,1),
-                       labels = scales::label_percent(suffix = ""),
-                       name = "% Reduction (assumption)")+
-    ylab("Mitigator code")+
-    theme_bw() + 
-    theme(panel.grid.major.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          legend.position = "none",
-          panel.spacing = unit(1, "lines"),
-          panel.background = element_rect(fill = NA, color = "grey20")
-    )+
-    ggtitle(group)
+    df |> 
+      dplyr::filter(Grouping == group) |>
+      ggplot(aes(x = midpoint, y = `Mitigator code`, colour = peer_year))+
+      geom_crossbar(aes(x = percentile50, 
+                        xmin = percentile90,
+                        xmax = percentile10),
+                    fill = "lightgrey",
+                    colour = "grey85",
+                    alpha = 0.2,
+                    width = 0.3)+
+      geom_pointrange(#data = ~ .x |> dplyr::filter(point_or_range == "range"),
+        aes(x = midpoint, 
+            xmin = value_1,
+            xmax = value_2),
+        size = 0.2,
+        linewidth = 1
+      )+
+      # geom_point(data = ~ .x |> dplyr::filter(point_or_range == "point"),
+      #            shape = 4,
+      #            size = 1,
+      #            stroke = 1) +
+      facet_wrap(~peer_year,
+                 nrow = 2,
+      )+
+      scale_x_continuous(breaks = c(0, 0.5, 1),
+                         limits = c(0,1),
+                         labels = scales::label_percent(suffix = ""),
+                         name = "% Reduction (assumption)")+
+      ylab("Mitigator code")+
+      theme_bw() + 
+      theme(panel.grid.major.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            legend.position = "none",
+            panel.spacing = unit(1, "lines"),
+            panel.background = element_rect(fill = NA, color = "grey20")
+      )+
+      ggtitle(group)
   )
 }
 
@@ -271,69 +229,69 @@ plot_pod_transposed <- function(pod){
     peer_year = unique(df$peer_year[df$parameter == "activity_avoidance"]),
     colour = scales::hue_pal()(length(unique(df$peer_year[df$parameter == "activity_avoidance"])))) |> 
     dplyr::mutate(new_peer_year = paste("<span style = 'color: ",
-                                          colour,
-                                          ";'>",
-                                          "\u25a0",
-                                          "</span>",
-                                          " ",
-                                          peer_year,
-                                          sep = ""))
+                                        colour,
+                                        ";'>",
+                                        "\u25a0",
+                                        "</span>",
+                                        " ",
+                                        peer_year,
+                                        sep = ""))
   
   print(
-  df |> 
-    dplyr::filter(activity_type == pod & 
-                    parameter == "activity_avoidance") |> 
-    dplyr::mutate(strategy = stringr::str_replace_all(strategy,
-                                                      "_",
-                                                      " ")) |>
-    dplyr::left_join(colours) |>
-    dplyr::mutate(peer_year = new_peer_year) |> 
-    dplyr::select(-new_peer_year) |> 
-    ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
-    geom_crossbar(aes(x = mean, 
-                      xmin = percentile90,
-                      xmax = percentile10),
-                  fill = "lightgrey",
-                  colour = "grey85",
-                  alpha = 0.2,
-                  width = 0.4)+
-    geom_pointrange(#data = ~ .x |> dplyr::filter(point_or_range == "range"),
-                    aes(x = midpoint, 
-                        xmin = value_1,
-                        xmax = value_2),
-                    size = 0.3,
-                    linewidth = 1.2
-    )+
-    scale_colour_identity()+
-    # geom_point(data = ~ .x |> dplyr::filter(point_or_range == "point"),
-    #            shape = 4,
-    #            size = 1,
-    #            stroke = 1) +
-    facet_wrap(~ strategy,
+    df |> 
+      dplyr::filter(activity_type == pod & 
+                      parameter == "activity_avoidance") |> 
+      dplyr::mutate(strategy = stringr::str_replace_all(strategy,
+                                                        "_",
+                                                        " ")) |>
+      dplyr::left_join(colours) |>
+      dplyr::mutate(peer_year = new_peer_year) |> 
+      dplyr::select(-new_peer_year) |> 
+      ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
+      geom_crossbar(aes(x = mean, 
+                        xmin = percentile90,
+                        xmax = percentile10),
+                    fill = "lightgrey",
+                    colour = "grey85",
+                    alpha = 0.2,
+                    width = 0.4)+
+      geom_pointrange(#data = ~ .x |> dplyr::filter(point_or_range == "range"),
+        aes(x = midpoint, 
+            xmin = value_1,
+            xmax = value_2),
+        size = 0.3,
+        linewidth = 1.2
+      )+
+      scale_colour_identity()+
+      # geom_point(data = ~ .x |> dplyr::filter(point_or_range == "point"),
+      #            shape = 4,
+      #            size = 1,
+      #            stroke = 1) +
+      facet_wrap(~ strategy,
                  #`Mitigator code`,
-               #nrow = 2,
-               labeller = label_wrap_gen(width = wrap_width),
-               ncol = facet_cols
-    )+
-    scale_x_continuous(breaks = c(0, 0.5, 1),
-                       labels = c(0, 0.5, 1),
-                       limits = c(0,1),
-                       #labels = scales::label_percent(suffix = ""),
-                       name = "80% Confidence Interval (0-1)"
-                       #,guide = guide_axis(n.dodge=1,angle = 45)
-                       
-    )+
-    ylab("Trust Code")+
-    theme_bw() + 
-    theme(panel.grid.major.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.text.y = ggtext::element_markdown(),
-          legend.position = "none",
-          panel.spacing = unit(0.2, "lines"),
-          panel.background = element_rect(fill = NA, color = "grey20"),
-          strip.text.x.top = element_text(size = facet_font)
-    ) +
-    ggtitle(paste(toupper(pod), "Overview: Activity Avoidance"))
+                 #nrow = 2,
+                 labeller = label_wrap_gen(width = wrap_width),
+                 ncol = facet_cols
+      )+
+      scale_x_continuous(breaks = c(0, 0.5, 1),
+                         labels = c(0, 0.5, 1),
+                         limits = c(0,1),
+                         #labels = scales::label_percent(suffix = ""),
+                         name = "80% Confidence Interval (0-1)"
+                         #,guide = guide_axis(n.dodge=1,angle = 45)
+                         
+      )+
+      ylab("Trust Code")+
+      theme_bw() + 
+      theme(panel.grid.major.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = ggtext::element_markdown(),
+            legend.position = "none",
+            panel.spacing = unit(0.2, "lines"),
+            panel.background = element_rect(fill = NA, color = "grey20"),
+            strip.text.x.top = element_text(size = facet_font)
+      ) +
+      ggtitle(paste(toupper(pod), "Overview: Activity Avoidance"))
   )
 }
 
@@ -359,47 +317,47 @@ plot_mitigator_group_transposed <- function(group, facet_cols){
       dplyr::mutate(strategy = stringr::str_replace_all(strategy,
                                                         "_",
                                                         " ")) |> 
-    dplyr::filter(Grouping == group & 
-                    parameter == "activity_avoidance") |>
+      dplyr::filter(Grouping == group & 
+                      parameter == "activity_avoidance") |>
       dplyr::left_join(colours) |>
       dplyr::mutate(peer_year = new_peer_year) |> 
       dplyr::select(-new_peer_year) |> 
-    ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
-    geom_crossbar(aes(x = mean, 
-                      xmin = percentile90,
-                      xmax = percentile10),
-                  fill = "lightgrey",
-                  colour = "grey85",
-                  alpha = 0.2,
-                  width = 0.4)+
-    geom_pointrange(aes(x = midpoint, 
-                        xmin = value_1,
-                        xmax = value_2),
-                    size = 0.3,
-                    linewidth = 1.2
-    )+
+      ggplot(aes(x = midpoint, y = peer_year, colour = colour))+
+      geom_crossbar(aes(x = mean, 
+                        xmin = percentile90,
+                        xmax = percentile10),
+                    fill = "lightgrey",
+                    colour = "grey85",
+                    alpha = 0.2,
+                    width = 0.4)+
+      geom_pointrange(aes(x = midpoint, 
+                          xmin = value_1,
+                          xmax = value_2),
+                      size = 0.3,
+                      linewidth = 1.2
+      )+
       scale_colour_identity()+
-    facetious::facet_wrap_strict(~strategy,
-                                 
-                                 ncol = facet_cols,
-                                 nrow = 2,
-                                 labeller = label_wrap_gen(width = 20)
-    )+
-    scale_x_continuous(breaks = c(0, 0.5, 1),
-                       labels = c(0, 0.5, 1),
-                       limits = c(0,1),
-                       name = "80% Confidence Interval (0-1)")+
-    ylab("Trust Code")+
-    theme_bw() + 
-    theme(panel.grid.major.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.text.y = ggtext::element_markdown(),
-          legend.position = "none",
-          panel.spacing = unit(0.2, "lines"),
-          panel.background = element_rect(fill = NA, color = "grey20"),
-          strip.text.x.top = element_text(size = 7)
-    )+
-    ggtitle(group)
+      facetious::facet_wrap_strict(~strategy,
+                                   
+                                   ncol = facet_cols,
+                                   nrow = 2,
+                                   labeller = label_wrap_gen(width = 20)
+      )+
+      scale_x_continuous(breaks = c(0, 0.5, 1),
+                         labels = c(0, 0.5, 1),
+                         limits = c(0,1),
+                         name = "80% Confidence Interval (0-1)")+
+      ylab("Trust Code")+
+      theme_bw() + 
+      theme(panel.grid.major.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = ggtext::element_markdown(),
+            legend.position = "none",
+            panel.spacing = unit(0.2, "lines"),
+            panel.background = element_rect(fill = NA, color = "grey20"),
+            strip.text.x.top = element_text(size = 7)
+      )+
+      ggtitle(group)
   )
 }
 
@@ -615,8 +573,8 @@ make_df_dt <- function(){
                                    list(extend = "csv",   
                                         filename = "nhp_inputs_raw_data",
                                         text = "Download Raw Data (.csv)")
-                                   )
-                                 ),
+                                 )
+                  ),
                   filter = "top",
                   rownames = F)
 }
@@ -649,14 +607,14 @@ trust_code_lookup <- readxl::read_excel("data/NHP_trust_code_lookup.xlsx")
 
 make_trust_code_lookup <- function(){
   
- df |> 
+  df |> 
     dplyr::select(peer,
                   peer_year,
                   baseline_year,
                   horizon_year,
                   scenario,
                   run_stage) |> 
-   dplyr::filter(!is.na(peer)) |> 
+    dplyr::filter(!is.na(peer)) |> 
     dplyr::group_by(
       dplyr::pick(tidyselect::everything())) |> 
     dplyr::summarise(tmp = dplyr::n()) |> 
@@ -678,17 +636,17 @@ make_trust_code_lookup <- function(){
     dplyr::arrange(`Site name`) |> 
     dplyr::mutate(dplyr::across(tidyselect::everything(),
                                 factor)) |> 
-      DT::datatable(options = list(dom = 'ftp',
-                                   pageLength = 5),
-                    filter = "top")
-      
+    DT::datatable(options = list(dom = 'ftp',
+                                 pageLength = 5),
+                  filter = "top")
+  
 }
 
 
 # 0.11 make heatmap midpoint ----
 
 generate_midpoint_table_all(activity_mitigators, 
-                          all_schemes)
+                            all_schemes)
 
 
 #//--SCRAP--\\ ----

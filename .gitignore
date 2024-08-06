@@ -22,7 +22,6 @@
 
 # Data allowed
 !golem-config.yml
-!mitigators.json
 
 # Other allowed files
 !.Renviron.example

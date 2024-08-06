@@ -1,8 +1,8 @@
 ---
 title: "NHP Mitigator Comparison Report"
-date: last-modified
-date-format: "D MMM YYYY HH:mm:ss"
-format: 
+date: "last-modified"
+date-format: D MMM YYYY HH:mm:ss
+format:
   html:
     page-layout: full
     fig-width: 9.5
@@ -17,10 +17,35 @@ editor: visual
 execute:
   echo: false
   warning: false
+resource_files:
+  - data/all_params.json
+  - data/all_peers.rds
+  - data/mitigator groupings.xlsx
+  - data/mitigator_name_lookup.csv
+  - data/nee_table.rds
+  - data/NHP_trust_code_lookup.xlsx
+  - data/providers.json
 ---
 
 ```{r}
-source("original_and_transposed_plots_script_270624.R")
+#| results: "asis"
+#| echo: false
+#| message: false
+required_env_vars <- c(
+  "AZ_TENANT_ID",
+  "AZ_STORAGE_EP",
+  "AZ_STORAGE_CONTAINER",
+  "NHP_ENCRYPT_KEY"
+)
+if (any(Sys.getenv(required_env_vars) == "")) {
+  cat("One of the following environment variables was not set, so exiting \n\n")
+  cat(paste("*", required_env_vars, collapse = "\n"), "\n\n")
+  knitr::knit_exit() 
+}
+```
+
+```{r}
+source("nhp-mitigators-report.R")
 ```
 
 # Introduction 
