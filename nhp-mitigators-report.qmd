@@ -17,6 +17,14 @@ editor: visual
 execute:
   echo: false
   warning: false
+resources: 
+  - data/all_params.json
+  - data/all_peers.rds
+  - "data/mitigator groupings.xlsx"
+  - data/mitigator_name_lookup.csv
+  - data/nee_table.rds
+  - data/NHP_trust_code_lookup.xlsx
+  - data/providers.json
 ---
 
 ```{r}
