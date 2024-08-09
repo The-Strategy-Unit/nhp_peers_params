@@ -1,6 +1,6 @@
 plot_pod_transposed <- function(dat, pod) {
   
-  cat("\n\n###", pod, "\n")
+  cat("\n\n###", convert_pod_name(pod), "\n")
   
   if (pod == "ip") {
     facet_cols <- 11
@@ -14,16 +14,7 @@ plot_pod_transposed <- function(dat, pod) {
     facet_font <- 7
   }
   
-  colours <- tibble::tibble(
-    peer_year = unique(dat$peer_year[dat$parameter == "activity_avoidance"]),
-    colour = scales::hue_pal()(
-      length(unique(dat$peer_year[dat$parameter == "activity_avoidance"])))
-  ) |> 
-    dplyr::mutate(
-      new_peer_year = paste0(
-        "<span style = 'color: ", colour, ";'>", "\u25a0", "</span>", " ", peer_year
-      )
-    )
+  colours <- build_peer_year_spans(dat, "activity_avoidance")
   
   dat_prepared <- dat |> 
     dplyr::filter(activity_type == pod & parameter == "activity_avoidance") |> 
@@ -96,17 +87,7 @@ plot_mitigator_group_transposed <- function(dat, group, facet_cols){
   
   cat("\n\n###", group, "\n")
   
-  colours <- tibble::tibble(
-    peer_year = unique(dat$peer_year[dat$parameter == "activity_avoidance"]),
-    colour = scales::hue_pal()(
-      length(unique(dat$peer_year[dat$parameter == "activity_avoidance"]))
-    )
-  ) |> 
-    dplyr::mutate(
-      new_peer_year = paste0(
-        "<span style = 'color: ", colour, ";'>", "\u25a0", "</span>", " ", peer_year
-      )
-    )
+  colours <- build_peer_year_spans(dat, "activity_avoidance")
   
   dat_prepared <- dat |> 
     dplyr::mutate(strategy = stringr::str_replace_all(strategy, "_", " ")) |> 
@@ -174,7 +155,7 @@ plot_mitigator_group_transposed <- function(dat, group, facet_cols){
 
 plot_efficiencies_pod_transposed <- function(dat, pod) {
   
-  cat("\n\n###", pod, "\n")
+  cat("\n\n###", convert_pod_name(pod), "\n")
   
   if (pod == "ip") {
     facet_cols <- 9
@@ -188,16 +169,7 @@ plot_efficiencies_pod_transposed <- function(dat, pod) {
     facet_font <- 7
   }
   
-  colours <- tibble::tibble(
-    peer_year = unique(dat$peer_year[dat$parameter == "efficiencies"]),
-    colour = scales::hue_pal()(
-      length(unique(dat$peer_year[dat$parameter == "efficiencies"])))
-  ) |> 
-    dplyr::mutate(
-      new_peer_year = paste0(
-        "<span style = 'color: ", colour, ";'>", "\u25a0", "</span>", " ", peer_year
-      )
-    )
+  colours <- build_peer_year_spans(dat, "efficiencies")
   
   dat_prepared <- dat |> 
     dplyr::filter(activity_type == pod & parameter == "efficiencies") |> 
@@ -268,16 +240,7 @@ plot_efficiencies_mitigator_group <- function(dat, group, facet_cols) {
   
   cat("\n\n###", group, "\n")
   
-  colours <- tibble::tibble(
-    peer_year = unique(dat$peer_year[dat$parameter == "efficiencies"]),
-    colour = scales::hue_pal()(
-      length(unique(dat$peer_year[dat$parameter == "efficiencies"])))
-  ) |> 
-    dplyr::mutate(
-      new_peer_year = paste0(
-        "<span style = 'color: ", colour, ";'>", "\u25a0", "</span>", " ", peer_year
-      )
-    )
+  colours <- build_peer_year_spans(dat, "efficiencies")
   
   dat_prepared <- dat |> 
     dplyr::mutate(strategy = stringr::str_replace_all(strategy, "_", " ")) |> 
@@ -341,5 +304,31 @@ plot_efficiencies_mitigator_group <- function(dat, group, facet_cols) {
     ggplot2::ggtitle(group)
   
   print(p)
+  
+}
+
+convert_pod_name <- function(pod) {
+  switch(pod, "aae" = "A&E", "ip" = "Inpatients", "op" = "Outpatients", NULL)
+}
+
+build_peer_year_spans <- function(
+    dat,
+    parameter = c("activity_avoidance", "efficiencies")
+) {
+  
+  peer_years <- dat |> 
+    dplyr::filter(parameter == parameter) |> 
+    dplyr::distinct(peer_year) |> 
+    dplyr::pull()
+  
+  tibble::tibble(
+    peer_year = peer_years,
+    colour = scales::hue_pal()(length(peer_years))
+  ) |> 
+    dplyr::mutate(
+      new_peer_year = glue::glue(
+        "<span style='color:{colour};'>\u25a0</span> {peer_year}"
+      )
+    )
   
 }
