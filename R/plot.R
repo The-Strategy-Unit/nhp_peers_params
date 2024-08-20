@@ -63,7 +63,7 @@ plot_pod_transposed <- function(dat, pod) {
       breaks = c(0, 0.5, 1),
       labels = c(0, 0.5, 1),
       limits = c(0,1),
-      name = "80% Confidence Interval (0-1)"
+      name = "80% prediction interval (0 to 1)"
       
     ) +
     ggplot2::ylab("Trust Code")+
@@ -133,7 +133,7 @@ plot_mitigator_group_transposed <- function(dat, group, facet_cols){
       breaks = c(0, 0.5, 1),
       labels = c(0, 0.5, 1),
       limits = c(0,1),
-      name = "80% Confidence Interval (0-1)"
+      name = "80% prediction interval (0 to 1)"
     ) +
     ggplot2::ylab("Trust Code")+
     ggplot2::theme_bw() + 
@@ -216,7 +216,7 @@ plot_efficiencies_pod_transposed <- function(dat, pod) {
       breaks = c(0, 0.5, 1),
       labels = c(0, 0.5, 1),
       limits = c(0,1),
-      name = "80% Confidence Interval (0-1)"
+      name = "80% prediction interval (0 to 1)"
     ) +
     ggplot2::ylab("Trust Code")+
     ggplot2::theme_bw() + 
@@ -288,7 +288,7 @@ plot_efficiencies_mitigator_group <- function(dat, group, facet_cols) {
       breaks = c(0, 0.5, 1),
       labels = c(0, 0.5, 1),
       limits = c(0,1),
-      name = "80% Confidence Interval (0-1)"
+      name = "80% prediction interval (0 to 1)"
     ) +
     ggplot2::ylab("Trust Code") +
     ggplot2::theme_bw() + 

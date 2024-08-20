@@ -136,7 +136,7 @@ make_trust_code_lookup(dat, trust_code_lookup)
 
 -   This section contains graphs of the activity avoidance input values. The graphs show parameters grouped by point of delivery (PoD) as well as a more granular grouping of parameters.
 
--   The graphs show, on the x-axis, the 80% confidence input range that Trusts have selected in the NHP Inputs App. These are shown as a horizontal coloured line, the endpoints of which are the low and high values selected in the Inputs App. The midpoint of this range is marked by a point. This value is shown between 0-1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the plots below.
+-   The graphs show, on the x-axis, the 80% prediction input range that Trusts have selected in the NHP Inputs App. These are shown as a horizontal coloured line, the endpoints of which are the low and high values selected in the Inputs App. The midpoint of this range is marked by a point. This value is shown between 0 and 1, e.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the plots below.
 
 -   If a Trust has a high value of 1, this is an assumption of no reduction to activity. If a Trust has a low value of 0, this is an assumption of a total (100%) reduction in activity.
 
