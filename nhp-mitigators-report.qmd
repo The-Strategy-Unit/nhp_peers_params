@@ -5,14 +5,16 @@ date-format: D MMM YYYY HH:mm:ss
 format:
   html:
     page-layout: full
-    fig-width: 9.5
-    fig-height: 6.5
+    fig-width: 12
+    fig-height: 10
     self-contained: true
     toc: true
     toc-depth: 3
     toc-expand: false
     number-sections: true
     number-offset: 0
+    grid:
+      body-width: 1100px
 editor: visual
 execute:
   echo: false
@@ -48,7 +50,7 @@ if (any(Sys.getenv(required_env_vars) == "")) {
 source("nhp-mitigators-report.R")
 ```
 
-# Introduction 
+# Introduction
 
 -   The following report can be used to compare the activity mitigator values that Trusts have selected for parameters in the NHP Inputs App.
 
@@ -70,11 +72,9 @@ make_trust_code_lookup()
 
 -   This section contains graphs of the activity avoidance input values. The graphs show parameters grouped by point of delivery (PoD) as well as a more granular grouping of parameters.
 
-```{=html}
 <!-- -->
-```
--   The graphs show, on the x-axis, the 80% confidence input range that Trusts have selected in the NHP Inputs App. These are shown as a horizontal coloured line, the endpoints of which are the low and high values selected in the Inputs App. The midpoint of this range is marked by a point. This value is shown between 0-1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the plots below.
 
+-   The graphs show, on the x-axis, the 80% input range that Trusts have selected in the NHP Inputs App. These are shown as a horizontal coloured line, the endpoints of which are the low and high values selected in the Inputs App. The midpoint of this range is marked by a point. This value is shown between 0 and 1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the plots below.
 
 -   If a Trust has a high value of 1, this is an assumption of no reduction to activity. If a Trust has a low value of 0, this is an assumption of a total (100%) reduction in activity.
 
@@ -143,11 +143,11 @@ purrr::walk2(df_mitigators,
              purrr::possibly(plot_efficiencies_mitigator_group)) 
 ```
 
-# Heat Maps 
+# Heat Maps
 
-## Mitigator Binary Table 
+## Mitigator Binary Table
 
--   This heatmap shows which Trusts have Input values for each activity mitigator. If a Trust has input a value then the cell will show a "&#10003;" with gold background. Otherwise it will show as "&#10005;" with a grey background.
+-   This heatmap shows which Trusts have Input values for each activity mitigator. If a Trust has input a value then the cell will show a "✓" with gold background. Otherwise it will show as "✕" with a grey background.
 
 ```{r}
 #| column: screen-inset
@@ -163,7 +163,7 @@ generate_binary_table_all(activity_mitigators,
 
 -   When a Trust has set a point estimate instead of a range, the cell will be coloured in grey and will show 'Point Estimate' in the parentheses.
 
--   If a Trust has not set a value for that mitigator then the cell will have no colour and will show a "&#10005;"
+-   If a Trust has not set a value for that mitigator then the cell will have no colour and will show a "✕"
 
 ```{r}
 #| column: screen-inset
