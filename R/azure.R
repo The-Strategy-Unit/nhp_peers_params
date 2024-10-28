@@ -80,7 +80,8 @@ fetch_labelled_runs_meta <- function(container) {
   
   result_sets <- get_nhp_result_sets(container)
   
-  # Factor levels to order run_stage by
+  # Run stages to keep/convert to factor levels (in order of preference for
+  # selection). This set may expand in future as we add more NDG variants.
   run_stages <- c(
     "final_report_ndg2",  # first level because it's preferred
     "final_report_ndg1",
@@ -91,18 +92,17 @@ fetch_labelled_runs_meta <- function(container) {
   )
   
   latest_labelled_runs <- result_sets |>
-    dplyr::filter(!is.na(run_stage)) |>
+    dplyr::filter(run_stage %in% run_stages) |>
     dplyr::select(dataset, scenario, run_stage, file) |> 
     dplyr::mutate(run_stage = forcats::fct(run_stage, levels = run_stages)) |>
     dplyr::arrange(dataset, run_stage) |>  # run_stage will be ordered by level
-    dplyr::slice(1, .by = dataset) |>  # isolates the 'top' level within a scheme
+    dplyr::slice(1, .by = dataset) |>  # 'top' run stage level by preference order
     dplyr::mutate(
       run_stage = run_stage |> 
         as.character() |>  # convert from factor
         stringr::str_remove("(_report)?_ndg\\d") |> 
         stringr::str_to_sentence()  # 'Initial', 'Intermediate', 'Final'
     )
-  
 }
 
 # Read json files given Azure paths
