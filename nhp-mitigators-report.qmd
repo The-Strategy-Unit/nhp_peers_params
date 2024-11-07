@@ -4,13 +4,12 @@ date: "last-modified"
 date-format: D MMM YYYY HH:mm:ss
 format:
   html:
+    self-contained: true
     page-layout: full
     fig-width: 12
     fig-height: 10
-    self-contained: true
     toc: true
     toc-depth: 3
-    toc-expand: false
     number-sections: true
     number-offset: 0
     grid:
@@ -30,15 +29,18 @@ resource_files:
 ---
 
 ```{r}
+#| label: "check-env-vars"
 #| results: "asis"
 #| echo: false
 #| message: false
+
 required_env_vars <- c(
   "AZ_TENANT_ID",
   "AZ_STORAGE_EP",
   "AZ_STORAGE_CONTAINER",
   "NHP_ENCRYPT_KEY"
 )
+
 if (any(Sys.getenv(required_env_vars) == "")) {
   cat("One of the following environment variables was not set, so exiting \n\n")
   cat(paste("*", required_env_vars, collapse = "\n"), "\n\n")
@@ -47,7 +49,68 @@ if (any(Sys.getenv(required_env_vars) == "")) {
 ```
 
 ```{r}
-source("nhp-mitigators-report.R")
+#| label: attach-functions
+
+purrr::walk(list.files("R", ".R$", , TRUE), source)
+```
+
+```{r}
+#| label: read-data-azure
+
+# Read model-run data from Azure
+container <- get_container()  # relies on .Renviron variables
+runs_meta <- fetch_labelled_runs_meta(container)  # exposes run_stage metadata
+params <- fetch_labelled_runs_params(runs_meta, container)
+```
+
+```{r}
+#| label: read-data-local
+# Read local data
+all_params <- jsonlite::fromJSON("data/all_params.json")
+mitigator_lookup <- read_mitigator_lookup("data/mitigator_name_lookup.csv")
+mitigator_groups <- read_mitigator_groups("data/mitigator groupings.xlsx")
+nee <- read_nee("data/nee_table.rds")
+trust_code_lookup <- readxl::read_excel("data/NHP_trust_code_lookup.xlsx")
+```
+
+```{r}
+#| label: prepare-data
+
+extracted_params <- extract_params(params)
+skeleton_table <- prepare_skeleton_table(extracted_params)
+
+dat <- populate_table(
+  skeleton_table,
+  extracted_params,
+  mitigator_lookup,
+  mitigator_groups,
+  nee
+)
+
+# Heatmap-specific
+
+sample_activity_params <- all_params$params |>
+  report_params_table("activity_avoidance") |>
+  dplyr::select(
+    -c(
+      time_profile,
+      value_1,
+      value_2,
+      peer,
+      baseline_year,
+      horizon_year
+    )
+  )
+
+selected_activity_mitigators <- extracted_params |> dplyr::select(-time_profile)
+
+activity_mitigators <- sample_activity_params |>
+  dplyr::left_join(
+    selected_activity_mitigators,
+    by = c("activity_type", "strategy", "parameter")
+  )
+
+all_schemes <- unique(activity_mitigators$peer_year) |> sort()
 ```
 
 # Introduction
@@ -65,14 +128,13 @@ source("nhp-mitigators-report.R")
 # Trust Code Lookup
 
 ```{r}
-make_trust_code_lookup()
+#| label: "make-trust-code-lookup"
+make_trust_code_lookup(dat, trust_code_lookup)
 ```
 
 # Activity Avoidance
 
 -   This section contains graphs of the activity avoidance input values. The graphs show parameters grouped by point of delivery (PoD) as well as a more granular grouping of parameters.
-
-<!-- -->
 
 -   The graphs show, on the x-axis, the 80% input range that Trusts have selected in the NHP Inputs App. These are shown as a horizontal coloured line, the endpoints of which are the low and high values selected in the Inputs App. The midpoint of this range is marked by a point. This value is shown between 0 and 1. E.g. a pair of values entered in the App as 35%-45% would appear as 0.35-0.45 on the plots below.
 
@@ -90,25 +152,27 @@ make_trust_code_lookup()
 
 ## PoD Overview Plots
 
-```{r, results='asis'}
-df_pods <- 
-  unique(df$activity_type)
-  
-purrr::walk(df_pods, 
-            plot_pod_transposed)
+```{r}
+#| label: activity-avoidance-pod-overview-plots
+#| results: asis
 
+dat_pods <- unique(dat$activity_type)
+purrr::walk(dat_pods, \(dat_pod) plot_pod_transposed(dat, dat_pod))
 ```
 
 ## Mitigator Grouped Plots
 
-```{r, results='asis'}
-df_mitigators <-
-  unique(df$Grouping) |> 
-  sort()
+```{r}
+#| label: activity-avoidance-mitigator-grouped-plots
+#| results: asis
 
-purrr::walk2(df_mitigators,
-             8,
-             plot_mitigator_group_transposed)
+dat_mitigators <- unique(dat$Grouping) |> sort()
+
+purrr::walk2(
+  dat_mitigators,
+  8, 
+  \(group, cols) plot_mitigator_group_transposed(dat, group, cols)
+)
 ```
 
 # Efficiencies
@@ -119,28 +183,37 @@ purrr::walk2(df_mitigators,
 
 ## PoD Overview Plots
 
-```{r, results='asis'}
+```{r}
+#| label: efficiencies-pod-overview-plots
+#| results: asis
 
-df_pods <- 
-  unique(df$activity_type)
-  
-purrr::walk(df_pods, 
-            purrr::possibly(plot_efficiencies_pod_transposed,
-                            otherwise = NULL))
+dat_pods <- unique(dat$activity_type)
 
+possibly_plot_efficiencies_pod_transposed <- 
+  purrr::possibly(plot_efficiencies_pod_transposed)
+
+purrr::walk(
+  dat_pods,
+  \(dat_pod) possibly_plot_efficiencies_pod_transposed(dat, dat_pod)
+)
 ```
 
 ## Mitigator Grouped Plots
 
-```{r, results='asis'}
+```{r}
+#| label: efficiencies-mitigator-grouped-plots
+#| results: asis
 
-df_mitigators <-
-  unique(df$Grouping) |> 
-  sort()
+dat_mitigators <-unique(dat$Grouping) |> sort()
 
-purrr::walk2(df_mitigators,
-             8,
-             purrr::possibly(plot_efficiencies_mitigator_group)) 
+possibly_plot_efficiencies_mitigator_group <- 
+  purrr::possibly(plot_efficiencies_mitigator_group)
+
+purrr::walk2(
+  dat_mitigators,
+  8,
+  \(group, cols) possibly_plot_efficiencies_mitigator_group(dat, group, cols)
+)
 ```
 
 # Heat Maps
@@ -150,9 +223,11 @@ purrr::walk2(df_mitigators,
 -   This heatmap shows which Trusts have Input values for each activity mitigator. If a Trust has input a value then the cell will show a "✓" with gold background. Otherwise it will show as "✕" with a grey background.
 
 ```{r}
+#| label: mitigator-binary-table
+#| results: asis
 #| column: screen-inset
-generate_binary_table_all(activity_mitigators, 
-                          all_schemes)
+
+generate_binary_table_all(activity_mitigators, all_schemes)
 ```
 
 ## Mitigator Midpoint Table
@@ -166,8 +241,11 @@ generate_binary_table_all(activity_mitigators,
 -   If a Trust has not set a value for that mitigator then the cell will have no colour and will show a "✕"
 
 ```{r}
+#| label: mitigator-midpoint-table
+#| results: asis
 #| column: screen-inset
-generate_midpoint_table_all(activity_mitigators,                             all_schemes)
+
+generate_midpoint_table_all(activity_mitigators, all_schemes)
 ```
 
 # Appendix
@@ -175,12 +253,15 @@ generate_midpoint_table_all(activity_mitigators,                             all
 ## Mitigator Lookup
 
 ```{r}
+#| label: mitigator-lookup
 
-make_mitigator_lookup()
+make_mitigator_lookup(mitigator_groups)
 ```
 
 ## Raw Data
 
 ```{r}
-make_df_dt()
+#| label: raw-data
+
+make_raw_dt(dat)
 ```

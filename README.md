@@ -10,6 +10,8 @@ This is a static version of the report that acts as a stopgap until [the mitigat
 
 ## Instructions
 
+Following edits to the code, re-deploy the app to Connect by running the `deploy.R` script.
+
 To run the report locally:
 
 1. Put in the `data/` folder the following supporting files:
