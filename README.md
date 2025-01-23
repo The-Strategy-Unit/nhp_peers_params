@@ -2,15 +2,11 @@
 
 ## Purpose
 
-Generate an automated report that presents visually each scheme's selected mitigator values for New Hospital Programme (NHP) modelling and compare them against their peers' selections and the National Elicitation Exercise (NEE). 
+A Quarto report to compare mitigator values selected for modelling by schemes in the New Hospital Programme (NHP).
 
-This report is deployed to Posit Connect: [https://connect.strategyunitwm.nhs.uk/nhp/mitigator-comparison-report/](https://connect.strategyunitwm.nhs.uk/nhp/mitigator-comparison-report/)
-
-This is a static version of the report that acts as a stopgap until [the mitigator-comparison app](https://github.com/The-Strategy-Unit/nhp_inputs_report_app) is live.
+This report is superseded by [the mitigators comparison app](https://github.com/The-Strategy-Unit/nhp_inputs_report_app).
 
 ## Instructions
-
-Following edits to the code, re-deploy the app to Connect by running the `deploy.R` script.
 
 To run the report locally:
 
@@ -22,5 +18,7 @@ To run the report locally:
     * `nee_table.rds`
     * `NHP_trust_code_lookup.xlsx`
     * `providers.json`
-1. Create a `.Renviron` file that contains the variables in `.Renviron.example`.
+1. Create a `.Renviron` file in the project root and fill it with the variables in the provided `.Renviron.example` template.
 1. Open and render `nhp-mitigators-report.qmd` to produce the HTML report.
+
+Ask the Data Science team for these files and variables.
